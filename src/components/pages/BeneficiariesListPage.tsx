@@ -84,7 +84,6 @@ export default function BeneficiariesListPage({
     identityStatusFilter: identityStatusFilter !== 'all' ? identityStatusFilter : undefined,
     advancedFilters: {
       governorate: governorateFilter !== 'all' ? governorateFilter : undefined
-      governorate: governorateFilter !== 'all' ? governorateFilter : undefined,
       city: advancedFilters.cityFilter !== 'all' ? advancedFilters.cityFilter : undefined,
       district: advancedFilters.districtFilter !== 'all' ? advancedFilters.districtFilter : undefined,
       familyStatus: advancedFilters.familyStatusFilter !== 'all' ? advancedFilters.familyStatusFilter : undefined,
