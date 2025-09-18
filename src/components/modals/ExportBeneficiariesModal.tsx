@@ -430,6 +430,14 @@ export default function ExportBeneficiariesModal({
               <p className="text-sm text-gray-600">ملف Excel جاهز للفتح</p>
             </div>
           </div>
+
+          <div className="p-4 rounded-lg border-2 border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed">
+            <div className="text-center">
+              <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+              <h5 className="font-medium text-gray-500">PDF</h5>
+              <p className="text-sm text-gray-500">قريباً</p>
+            </div>
+          </div>
         </div>
 
         <div className="mt-4">
