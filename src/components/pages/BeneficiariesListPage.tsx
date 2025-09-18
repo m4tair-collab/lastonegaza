@@ -61,18 +61,6 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend, onNa
     familyId: loggedInUser?.associatedType === 'family' ? loggedInUser.associatedId : undefined,
     searchTerm,
     advancedFilters,
-    identityStatusFilter: showVerifiedOnly ? 'verified' : 'all'
-  });
-
-  // Get unique values for dynamic dropdowns
-  const governorates = [...new Set(mockBeneficiaries.map(b => b.detailedAddress.governorate))];
-  const cities = [...new Set(mockBeneficiaries
-    .filter(b => !advancedFilters.governorate || b.detailedAddress.governorate === advancedFilters.governorate)
-    .map(b => b.detailedAddress.city))];
-  const districts = [...new Set(mockBeneficiaries
-    .filter(b => 
-      (!advancedFilters.governorate || b.detailedAddress.governorate === advancedFilters.governorate) &&
-      (!advancedFilters.city || b.detailedAddress.city === advancedFilters.city)
     )
     .map(b => b.detailedAddress.district))];
 
