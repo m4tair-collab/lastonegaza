@@ -7,7 +7,6 @@ import BeneficiaryProfileModal from '../BeneficiaryProfileModal';
 import BeneficiaryForm from '../BeneficiaryForm';
 import { Button, Card, Input, Badge, StatCard, Modal, ConfirmationModal } from '../ui';
 import { mockBeneficiaries } from '../../data/mockData';
-import ExportBeneficiariesModal from '../modals/ExportBeneficiariesModal';
 
 interface BeneficiariesListPageProps {
   onNavigateToIndividualSend?: (beneficiaryId: string) => void;
