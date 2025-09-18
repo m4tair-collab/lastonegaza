@@ -949,6 +949,20 @@ export default function BeneficiaryProfileModal({
                   >
                     تحميل الصورة
                   </Button>
+                  <Button
+                    variant="warning"
+                    size="sm"
+                    onClick={() => {
+                      setConfirmAction({
+                        type: 'suspend',
+                        beneficiaryId: beneficiary.id,
+                        beneficiaryName: beneficiary.name
+                      });
+                      setShowConfirmModal(true);
+                    }}
+                  >
+                    تعليق الحساب
+                  </Button>
                 </div>
               </div>
               
