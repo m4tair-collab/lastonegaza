@@ -257,6 +257,7 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
         <div className="grid md:grid-cols-12 gap-4 items-end">
           <div className="md:col-span-8">
             <Input
+              icon={Search}
               placeholder="البحث في المستفيدين (الاسم، رقم الهوية، الهاتف)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
