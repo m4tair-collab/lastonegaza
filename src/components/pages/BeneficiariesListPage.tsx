@@ -965,3 +965,4 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
 
     </div>
   );
+}
