@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Search, Filter, Plus, Eye, Edit, Phone, MessageSquare, CheckCircle, Clock, AlertTriangle, Shield, UserCheck, Download, Star, UserPlus, X, MapPin, DollarSign, Heart, RefreshCw, UserX } from 'lucide-react';
+import { Users, Search, Filter, Plus, Eye, Edit, Phone, MessageSquare, CheckCircle, Clock, AlertTriangle, Shield, UserCheck, Download, BadgeCheck, UserPlus, X, MapPin, DollarSign, Heart, RefreshCw, UserX, Hash } from 'lucide-react';
 import { type Beneficiary, type SystemUser } from '../../data/mockData';
 import { useBeneficiaries } from '../../hooks/useBeneficiaries';
 import { useAuth } from '../../context/AuthContext';
@@ -26,6 +26,10 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
     beneficiaryId: string;
     beneficiaryName: string;
   } | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
   const [advancedFilters, setAdvancedFilters] = useState({
     governorate: '',
     city: '',
@@ -52,7 +56,8 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
     organizationId: loggedInUser?.associatedType === 'organization' ? loggedInUser.associatedId : undefined,
     familyId: loggedInUser?.associatedType === 'family' ? loggedInUser.associatedId : undefined,
     searchTerm,
-    advancedFilters
+    advancedFilters,
+    identityStatusFilter: showVerifiedOnly ? 'verified' : 'all'
   });
 
   // Get unique values for dynamic dropdowns
@@ -104,7 +109,8 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
   };
 
   const getActiveFiltersCount = () => {
-    return Object.values(advancedFilters).filter(value => value !== '').length;
+    const filtersCount = Object.values(advancedFilters).filter(value => value !== '').length;
+    return filtersCount + (showVerifiedOnly ? 1 : 0);
   };
 
   const getActiveFilters = () => {
@@ -133,6 +139,13 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
       }
     });
 
+    if (showVerifiedOnly) {
+      activeFilters.push({
+        key: 'verified_only',
+        label: 'الحسابات الموثقة فقط',
+        value: 'مفعل'
+      });
+    }
     return activeFilters;
   };
 
@@ -182,10 +195,14 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
   };
 
   const removeAdvancedFilter = (filterKey: string) => {
-    setAdvancedFilters(prev => ({
-      ...prev,
-      [filterKey]: ''
-    }));
+    if (filterKey === 'verified_only') {
+      setShowVerifiedOnly(false);
+    } else {
+      setAdvancedFilters(prev => ({
+        ...prev,
+        [filterKey]: ''
+      }));
+    }
   };
   const handleViewBeneficiary = (beneficiary: Beneficiary) => {
     setSelectedBeneficiary(beneficiary);
@@ -261,6 +278,16 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
     return { title: '', message: '', confirmText: '', variant: 'primary' as const };
   };
 
+  // Pagination calculations
+  const totalPages = Math.ceil(beneficiaries.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedBeneficiaries = beneficiaries.slice(startIndex, endIndex);
+
+  const handleExportBeneficiaries = () => {
+    setShowExportModal(true);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
@@ -292,7 +319,12 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
       {/* Actions Bar */}
       <div className="flex items-center justify-between">
         <div className="flex space-x-3 space-x-reverse">
-          <Button variant="success" icon={Download} iconPosition="right">
+          <Button 
+            variant="success" 
+            icon={Download} 
+            iconPosition="right"
+            onClick={handleExportBeneficiaries}
+          >
             تصدير القائمة
           </Button>
           <Button 
@@ -549,6 +581,14 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
               {/* Filter Actions */}
               <div className="flex space-x-3 space-x-reverse justify-center mt-6 pt-4 border-t border-gray-200">
                 <Button
+                  variant={showVerifiedOnly ? "success" : "secondary"}
+                  icon={BadgeCheck}
+                  iconPosition="right"
+                  onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
+                >
+                  الحسابات الموثقة فقط
+                </Button>
+                <Button
                   variant="secondary"
                   icon={RefreshCw}
                   iconPosition="right"
@@ -605,42 +645,13 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
         )}
       </Card>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard
-          title="إجمالي المستفيدين"
-          value={statistics.total}
-          icon={Users}
-          color="blue"
-        />
-
-        <StatCard
-          title="موثقين"
-          value={statistics.verified}
-          icon={Shield}
-          color="green"
-        />
-
-        <StatCard
-          title="بانتظار التوثيق"
-          value={statistics.pending}
-          icon={Clock}
-          color="orange"
-        />
-
-        <StatCard
-          title="مرفوض التوثيق"
-          value={statistics.rejected}
-          icon={Shield}
-          color="red"
-        />
-      </div>
-
       {/* Beneficiaries Table */}
       <Card padding="none" className="overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">قائمة المستفيدين ({beneficiaries.length})</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              قائمة المستفيدين (عرض {startIndex + 1}-{Math.min(endIndex, beneficiaries.length)} من {beneficiaries.length})
+            </h3>
             <div className="flex items-center space-x-2 space-x-reverse text-blue-600">
               <CheckCircle className="w-4 h-4" />
               <span className="text-sm">البيانات الوهمية</span>
@@ -652,6 +663,9 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    #
+                  </th>
                   <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     المستفيد
                   </th>
@@ -676,9 +690,14 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {beneficiaries.length > 0 ? (
-                  beneficiaries.map((beneficiary) => (
+                {paginatedBeneficiaries.length > 0 ? (
+                  paginatedBeneficiaries.map((beneficiary, index) => (
                     <tr key={beneficiary.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div className="bg-gray-100 text-gray-600 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold">
+                          {startIndex + index + 1}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="bg-blue-100 p-2 rounded-lg ml-4">
@@ -688,7 +707,7 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
                             <div className="flex items-center space-x-2 space-x-reverse">
                               <span className="text-sm font-medium text-gray-900">{beneficiary.name}</span>
                               {beneficiary.identityStatus === 'verified' && (
-                                <Star className="w-4 h-4 text-green-500 fill-green-500" title="موثق" />
+                                <BadgeCheck className="w-4 h-4 text-green-600" title="موثق" />
                               )}
                             </div>
                             <div className="text-sm text-gray-500">
@@ -776,7 +795,7 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center">
+                    <td colSpan={8} className="px-6 py-12 text-center">
                       <div className="text-gray-500">
                         <Users className="w-8 h-8 mx-auto mb-4 text-gray-300" />
                         <p className="text-lg font-medium">لا توجد بيانات مستفيدين</p>
@@ -790,6 +809,57 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
               </tbody>
             </table>
         </div>
+        
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                عرض {startIndex + 1}-{Math.min(endIndex, beneficiaries.length)} من {beneficiaries.length} مستفيد
+              </div>
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  السابق
+                </Button>
+                
+                <div className="flex space-x-1 space-x-reverse">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                    if (pageNum > totalPages) return null;
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                          currentPage === pageNum
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  التالي
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </Card>
 
       {/* Beneficiary Details Modal */}
@@ -876,6 +946,21 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
         type="warning"
       />
 
+      {/* Export Modal */}
+      {showExportModal && (
+        <Modal
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          title="تصدير قائمة المستفيدين"
+          size="lg"
+        >
+          <ExportBeneficiariesModal
+            beneficiaries={beneficiaries}
+            activeFilters={getActiveFilters()}
+            onClose={() => setShowExportModal(false)}
+          />
+        </Modal>
+      )}
+
     </div>
   );
-}
