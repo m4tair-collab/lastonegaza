@@ -568,55 +568,58 @@ export default function BeneficiariesListPage({
         <div className="space-y-4">
           {/* Basic Filters Row */}
           <div className="grid md:grid-cols-5 gap-4">
-            <div className="md:col-span-2">
-              <Input
-                type="text"
-                icon={Search}
-                iconPosition="right"
-                placeholder="البحث (الاسم، رقم الهوية، الهاتف)..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            
-            <div>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">جميع الحالات</option>
-                <option value="active">نشط</option>
-                <option value="pending">معلق</option>
-                <option value="suspended">متوقف</option>
-              </select>
-            </div>
-            
-            <div>
-              <select
-                value={identityStatusFilter}
-                onChange={(e) => setIdentityStatusFilter(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">جميع حالات التوثيق</option>
-                <option value="verified">موثق</option>
-                <option value="pending">بانتظار التوثيق</option>
-                <option value="rejected">مرفوض التوثيق</option>
-              </select>
-            </div>
-            
-            <div>
-              <select
-                value={governorateFilter}
-                onChange={(e) => setGovernorateFilter(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">جميع المحافظات</option>
-                {governorates.map(governorate => (
-                  <option key={governorate} value={governorate}>{governorate}</option>
-                ))}
-              </select>
-            </div>
+          <div className="md:col-span-2">
+            <Input
+              type="text"
+              icon={Search}
+              iconPosition="right"
+              placeholder="البحث (الاسم، رقم الهوية، الهاتف)..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          <div>
+            <select
+              value={identityStatusFilter}
+              onChange={(e) => setIdentityStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">جميع حالات التوثيق</option>
+              <option value="verified">موثق</option>
+              <option value="pending">بانتظار التوثيق</option>
+              <option value="rejected">مرفوض التوثيق</option>
+            </select>
+          </div>
+          
+          <div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">جميع الحالات</option>
+              <option value="active">نشط</option>
+              <option value="pending">معلق</option>
+              <option value="suspended">متوقف</option>
+            </select>
+          </div>
+          
+          <div>
+            <select
+              value={governorateFilter}
+              onChange={(e) => {
+                setGovernorateFilter(e.target.value);
+                setAdvancedFilters(prev => ({ ...prev, cityFilter: 'all', districtFilter: 'all' }));
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">جميع المحافظات</option>
+              {governorates.map(governorate => (
+                <option key={governorate} value={governorate}>{governorate}</option>
+              ))}
+            </select>
+          </div>
           </div>
 
           {/* Advanced Filters Toggle */}
