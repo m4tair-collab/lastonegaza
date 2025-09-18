@@ -748,14 +748,40 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend, onNa
 
       {/* Beneficiaries Table */}
       <Card padding="none" className="overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">
-              قائمة المستفيدين (عرض {startIndex + 1}-{Math.min(endIndex, beneficiaries.length)} من {beneficiaries.length})
-            </h3>
-            <div className="flex items-center space-x-2 space-x-reverse text-blue-600">
-              <CheckCircle className="w-4 h-4" />
-              <span className="text-sm">البيانات الوهمية</span>
+        <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">قائمة المستفيدين</h3>
+            
+            {/* Data Source Badge */}
+            <div className="flex items-center justify-center space-x-2 space-x-reverse mb-3">
+              <div className="bg-blue-100 p-1.5 rounded-lg">
+                <CheckCircle className="w-4 h-4 text-blue-600" />
+              </div>
+              <span className="text-sm font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
+                البيانات الوهمية
+              </span>
+            </div>
+            
+            {/* Count Display */}
+            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm inline-block">
+              <div className="flex items-center space-x-4 space-x-reverse">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-1">المعروض حالياً</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {startIndex + 1}-{Math.min(endIndex, beneficiaries.length)}
+                  </p>
+                </div>
+                <div className="w-px h-8 bg-gray-300"></div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-1">إجمالي المفلترين</p>
+                  <p className="text-2xl font-bold text-green-600">{beneficiaries.length}</p>
+                </div>
+                <div className="w-px h-8 bg-gray-300"></div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-1">إجمالي النظام</p>
+                  <p className="text-2xl font-bold text-purple-600">{mockBeneficiaries.length}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
