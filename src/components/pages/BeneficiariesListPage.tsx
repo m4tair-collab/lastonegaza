@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Users, Search, Filter, Plus, Eye, Edit, Phone, MessageSquare, CheckCircle, Clock, AlertTriangle, Shield, UserCheck, Download, BadgeCheck, UserPlus, X, MapPin, DollarSign, Heart, RefreshCw, UserX, Hash, Send, Package, FileText } from 'lucide-react';
+import { Users, Search, Filter, Plus, Eye, Edit, Phone, MessageSquare, CheckCircle, Clock, AlertTriangle, Shield, UserCheck, Download, BadgeCheck, UserPlus, X, MapPin, DollarSign, Heart, RefreshCw, UserX, Hash, Send, Package } from 'lucide-react';
 import { type Beneficiary, type SystemUser } from '../../data/mockData';
 import { useBeneficiaries } from '../../hooks/useBeneficiaries';
 import { useAuth } from '../../context/AuthContext';
 import BeneficiaryProfileModal from '../BeneficiaryProfileModal';
 import BeneficiaryForm from '../BeneficiaryForm';
 import { Button, Card, Input, Badge, StatCard, Modal, ConfirmationModal } from '../ui';
+import ExportBeneficiariesModal from '../modals/ExportBeneficiariesModal';
 import { mockBeneficiaries } from '../../data/mockData';
 
 interface BeneficiariesListPageProps {
@@ -33,7 +34,6 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend, onNa
   const [itemsPerPage] = useState(20);
   const [selectedBeneficiaries, setSelectedBeneficiaries] = useState<string[]>([]);
   const [showBulkActions, setShowBulkActions] = useState(false);
-  const [exportFormat, setExportFormat] = useState<'json' | 'excel'>('json');
   const [advancedFilters, setAdvancedFilters] = useState({
     governorate: '',
     city: '',
@@ -333,137 +333,13 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend, onNa
   };
 
   const handleExportBeneficiaries = () => {
-    setShowExportModal(true);
-  };
-
-  const executeExport = () => {
-    const dataToExport = selectedBeneficiaries.length > 0 
-      ? beneficiaries.filter(b => selectedBeneficiaries.includes(b.id))
-      : beneficiaries;
-
-    const exportData = {
-      metadata: {
-        exportDate: new Date().toISOString(),
-        totalBeneficiaries: dataToExport.length,
-        format: exportFormat,
-        activeFilters: getActiveFilters(),
-        exportType: selectedBeneficiaries.length > 0 ? 'selected' : 'filtered'
-      },
-      statistics: {
-        total: dataToExport.length,
-        verified: dataToExport.filter(b => b.identityStatus === 'verified').length,
-        pending: dataToExport.filter(b => b.identityStatus === 'pending').length,
-        rejected: dataToExport.filter(b => b.identityStatus === 'rejected').length,
-        active: dataToExport.filter(b => b.status === 'active').length,
-        suspended: dataToExport.filter(b => b.status === 'suspended').length
-      },
-      beneficiaries: dataToExport.map((beneficiary, index) => ({
-        rowNumber: index + 1,
-        name: beneficiary.name,
-        fullName: beneficiary.fullName,
-        nationalId: beneficiary.nationalId,
-        phone: beneficiary.phone,
-        dateOfBirth: beneficiary.dateOfBirth,
-        gender: beneficiary.gender === 'male' ? 'ذكر' : 'أنثى',
-        governorate: beneficiary.detailedAddress.governorate,
-        city: beneficiary.detailedAddress.city,
-        district: beneficiary.detailedAddress.district,
-        street: beneficiary.detailedAddress.street,
-        fullAddress: `${beneficiary.detailedAddress.governorate} - ${beneficiary.detailedAddress.city} - ${beneficiary.detailedAddress.district}`,
-        profession: beneficiary.profession,
-        maritalStatus: {
-          'single': 'أعزب',
-          'married': 'متزوج',
-          'divorced': 'مطلق',
-          'widowed': 'أرمل'
-        }[beneficiary.maritalStatus] || beneficiary.maritalStatus,
-        economicLevel: {
-          'very_poor': 'فقير جداً',
-          'poor': 'فقير',
-          'moderate': 'متوسط',
-          'good': 'ميسور'
-        }[beneficiary.economicLevel] || beneficiary.economicLevel,
-        membersCount: beneficiary.membersCount,
-        medicalConditions: beneficiary.medicalConditions?.join(', ') || 'لا توجد',
-        identityStatus: {
-          'verified': 'موثق',
-          'pending': 'بانتظار التوثيق',
-          'rejected': 'مرفوض التوثيق'
-        }[beneficiary.identityStatus] || beneficiary.identityStatus,
-        status: {
-          'active': 'نشط',
-          'pending': 'معلق',
-          'suspended': 'موقوف'
-        }[beneficiary.status] || beneficiary.status,
-        totalPackages: beneficiary.totalPackages,
-        lastReceived: beneficiary.lastReceived,
-        createdAt: new Date(beneficiary.createdAt).toLocaleDateString('ar-SA'),
-        notes: beneficiary.notes || 'لا توجد ملاحظات'
-      }))
-    };
-
-    const fileName = `قائمة_المستفيدين_${new Date().toISOString().split('T')[0]}`;
-    
-    if (exportFormat === 'json') {
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${fileName}.json`;
-      link.click();
-      URL.revokeObjectURL(url);
-    } else if (exportFormat === 'excel') {
-      // إنشاء ملف Excel
-      const headers = [
-        'الرقم', 'الاسم', 'الاسم الكامل', 'رقم الهوية', 'الهاتف', 'تاريخ الميلاد', 'الجنس',
-        'المحافظة', 'المدينة', 'الحي', 'الشارع', 'المهنة', 'الحالة الاجتماعية',
-        'المستوى الاقتصادي', 'عدد أفراد الأسرة', 'الحالات المرضية', 'حالة التوثيق',
-        'حالة الحساب', 'إجمالي الطرود', 'آخر استلام', 'تاريخ التسجيل', 'الملاحظات'
-      ];
-      
-      let csvContent = '\uFEFF' + headers.join(',') + '\n'; // BOM للدعم العربي في Excel
-      
-      exportData.beneficiaries.forEach(beneficiary => {
-        const row = [
-          beneficiary.rowNumber,
-          beneficiary.name,
-          beneficiary.fullName,
-          beneficiary.nationalId,
-          beneficiary.phone,
-          beneficiary.dateOfBirth,
-          beneficiary.gender,
-          beneficiary.governorate,
-          beneficiary.city,
-          beneficiary.district,
-          beneficiary.street,
-          beneficiary.profession,
-          beneficiary.maritalStatus,
-          beneficiary.economicLevel,
-          beneficiary.membersCount,
-          beneficiary.medicalConditions,
-          beneficiary.identityStatus,
-          beneficiary.status,
-          beneficiary.totalPackages,
-          beneficiary.lastReceived,
-          beneficiary.createdAt,
-          beneficiary.notes
-        ].map(value => `"${String(value || '').replace(/"/g, '""')}"`);
-        
-        csvContent += row.join(',') + '\n';
-      });
-      
-      const dataBlob = new Blob([csvContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${fileName}.xlsx`;
-      link.click();
-      URL.revokeObjectURL(url);
+    if (selectedBeneficiaries.length > 0) {
+      // Export only selected beneficiaries
+      handleBulkExport();
+    } else {
+      // Export all filtered beneficiaries
+      setShowExportModal(true);
     }
-
-    alert(`تم تصدير ${dataToExport.length} مستفيد بصيغة ${exportFormat === 'json' ? 'JSON' : 'Excel'} بنجاح!`);
-    setShowExportModal(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -1215,114 +1091,18 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend, onNa
 
       {/* Export Modal */}
       {showExportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" dir="rtl">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">تصدير قائمة المستفيدين</h3>
-              <button 
-                onClick={() => setShowExportModal(false)}
-                className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            {/* Export Summary */}
-            <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-6">
-              <div className="grid md:grid-cols-3 gap-4 text-center">
-                <div>
-                  <p className="text-sm text-blue-600 mb-1">عدد المستفيدين</p>
-                  <p className="text-2xl font-bold text-blue-900">
-                    {selectedBeneficiaries.length > 0 ? selectedBeneficiaries.length : beneficiaries.length}
-                  </p>
-                  <p className="text-xs text-blue-700">
-                    {selectedBeneficiaries.length > 0 ? 'المحددين' : 'المفلترين'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-green-600 mb-1">الفلاتر النشطة</p>
-                  <p className="text-2xl font-bold text-green-900">{getActiveFiltersCount()}</p>
-                  <p className="text-xs text-green-700">فلتر مطبق</p>
-                </div>
-                <div>
-                  <p className="text-sm text-purple-600 mb-1">نوع التصدير</p>
-                  <p className="text-lg font-bold text-purple-900">
-                    {selectedBeneficiaries.length > 0 ? 'محدد' : 'مفلتر'}
-                  </p>
-                  <p className="text-xs text-purple-700">حسب التحديد</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Active Filters Display */}
-            {getActiveFiltersCount() > 0 && (
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-6">
-                <h4 className="font-medium text-gray-900 mb-3">الفلاتر المطبقة:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {getActiveFilters().map((filter) => (
-                    <Badge key={filter.key} variant="info" size="sm">
-                      {filter.label}: {filter.value}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Format Selection */}
-            <div className="mb-6">
-              <h4 className="font-medium text-gray-900 mb-4">اختيار تنسيق التصدير</h4>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div
-                  onClick={() => setExportFormat('json')}
-                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    exportFormat === 'json'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="text-center">
-                    <FileText className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-                    <h5 className="font-medium text-gray-900">JSON</h5>
-                    <p className="text-sm text-gray-600">ملف JSON مع جميع التفاصيل والإحصائيات</p>
-                  </div>
-                </div>
-
-                <div
-                  onClick={() => setExportFormat('excel')}
-                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    exportFormat === 'excel'
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="text-center">
-                    <FileText className="w-8 h-8 mx-auto mb-2 text-green-600" />
-                    <h5 className="font-medium text-gray-900">Excel</h5>
-                    <p className="text-sm text-gray-600">ملف Excel جاهز للفتح مباشرة</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Export Actions */}
-            <div className="flex space-x-3 space-x-reverse justify-end">
-              <Button
-                variant="secondary"
-                onClick={() => setShowExportModal(false)}
-              >
-                إلغاء
-              </Button>
-              <Button
-                variant="primary"
-                icon={Download}
-                iconPosition="right"
-                onClick={executeExport}
-              >
-                تصدير ({selectedBeneficiaries.length > 0 ? selectedBeneficiaries.length : beneficiaries.length}) مستفيد
-              </Button>
-            </div>
-          </div>
-        </div>
+        <Modal
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          title="تصدير قائمة المستفيدين"
+          size="lg"
+        >
+          <ExportBeneficiariesModal
+            beneficiaries={selectedBeneficiaries.length > 0 ? beneficiaries.filter(b => selectedBeneficiaries.includes(b.id)) : beneficiaries}
+            activeFilters={getActiveFilters()}
+            onClose={() => setShowExportModal(false)}
+          />
+        </Modal>
       )}
 
     </div>
