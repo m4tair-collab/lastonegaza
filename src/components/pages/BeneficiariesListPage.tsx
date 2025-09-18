@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import BeneficiaryProfileModal from '../BeneficiaryProfileModal';
 import BeneficiaryForm from '../BeneficiaryForm';
 import { Button, Card, Input, Badge, StatCard, Modal, ConfirmationModal } from '../ui';
+import ExportBeneficiariesModal from '../modals/ExportBeneficiariesModal';
 import { mockBeneficiaries } from '../../data/mockData';
 
 interface BeneficiariesListPageProps {
