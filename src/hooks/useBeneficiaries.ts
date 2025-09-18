@@ -8,6 +8,19 @@ interface UseBeneficiariesOptions {
   searchTerm?: string;
   statusFilter?: string;
   identityStatusFilter?: string;
+  advancedFilters?: {
+    governorate?: string;
+    city?: string;
+    district?: string;
+    familyStatus?: string;
+    familySize?: string;
+    ageGroup?: string;
+    economicLevel?: string;
+    displacementStatus?: string;
+    profession?: string;
+    healthStatus?: string;
+    medicalCondition?: string;
+  };
 }
 
 export const useBeneficiaries = (options: UseBeneficiariesOptions = {}) => {
@@ -76,8 +89,128 @@ export const useBeneficiaries = (options: UseBeneficiariesOptions = {}) => {
       filtered = filtered.filter(b => b.identityStatus === options.identityStatusFilter);
     }
 
+    // الفلاتر المتقدمة
+    if (options.advancedFilters) {
+      const filters = options.advancedFilters;
+
+      // فلترة جغرافية
+      if (filters.governorate) {
+        filtered = filtered.filter(b => b.detailedAddress.governorate === filters.governorate);
+      }
+      if (filters.city) {
+        filtered = filtered.filter(b => b.detailedAddress.city === filters.city);
+      }
+      if (filters.district) {
+        filtered = filtered.filter(b => b.detailedAddress.district === filters.district);
+      }
+
+      // فلترة الحالة العائلية
+      if (filters.familyStatus) {
+        switch (filters.familyStatus) {
+          case 'head_of_family':
+            filtered = filtered.filter(b => b.isHeadOfFamily);
+            break;
+          case 'spouse':
+            filtered = filtered.filter(b => b.spouseId && !b.isHeadOfFamily);
+            break;
+          case 'child':
+            filtered = filtered.filter(b => b.parentId);
+            break;
+          case 'orphan_guardian':
+            filtered = filtered.filter(b => b.childrenIds && b.childrenIds.length > 0 && b.maritalStatus === 'widowed');
+            break;
+          case 'family_with_orphans':
+            filtered = filtered.filter(b => b.childrenIds && b.childrenIds.length > 0);
+            break;
+          case 'elderly':
+            filtered = filtered.filter(b => {
+              const age = new Date().getFullYear() - new Date(b.dateOfBirth).getFullYear();
+              return age >= 60;
+            });
+            break;
+          case 'disabled':
+            filtered = filtered.filter(b => b.medicalConditions && b.medicalConditions.length > 0);
+            break;
+        }
+      }
+
+      // فلترة حجم الأسرة
+      if (filters.familySize) {
+        switch (filters.familySize) {
+          case 'small':
+            filtered = filtered.filter(b => b.membersCount >= 1 && b.membersCount <= 3);
+            break;
+          case 'medium':
+            filtered = filtered.filter(b => b.membersCount >= 4 && b.membersCount <= 7);
+            break;
+          case 'large':
+            filtered = filtered.filter(b => b.membersCount >= 8);
+            break;
+        }
+      }
+
+      // فلترة الفئة العمرية
+      if (filters.ageGroup) {
+        filtered = filtered.filter(b => {
+          const age = new Date().getFullYear() - new Date(b.dateOfBirth).getFullYear();
+          switch (filters.ageGroup) {
+            case 'child':
+              return age < 18;
+            case 'adult':
+              return age >= 18 && age < 60;
+            case 'elderly':
+              return age >= 60;
+            default:
+              return true;
+          }
+        });
+      }
+
+      // فلترة المستوى الاقتصادي
+      if (filters.economicLevel) {
+        filtered = filtered.filter(b => b.economicLevel === filters.economicLevel);
+      }
+
+      // فلترة المهنة
+      if (filters.profession) {
+        filtered = filtered.filter(b => 
+          b.profession.toLowerCase().includes(filters.profession!.toLowerCase())
+        );
+      }
+
+      // فلترة الحالة الصحية
+      if (filters.healthStatus) {
+        switch (filters.healthStatus) {
+          case 'has_medical':
+            filtered = filtered.filter(b => b.medicalConditions && b.medicalConditions.length > 0);
+            break;
+          case 'healthy':
+            filtered = filtered.filter(b => !b.medicalConditions || b.medicalConditions.length === 0);
+            break;
+          default:
+            if (filters.healthStatus) {
+              filtered = filtered.filter(b => 
+                b.medicalConditions && 
+                b.medicalConditions.some(condition => 
+                  condition.toLowerCase().includes(filters.healthStatus!.toLowerCase())
+                )
+              );
+            }
+        }
+      }
+
+      // فلترة حالة طبية محددة
+      if (filters.medicalCondition) {
+        filtered = filtered.filter(b => 
+          b.medicalConditions && 
+          b.medicalConditions.some(condition => 
+            condition.toLowerCase().includes(filters.medicalCondition!.toLowerCase())
+          )
+        );
+      }
+    }
     return filtered;
-  }, [beneficiaries, options.searchTerm, options.statusFilter, options.identityStatusFilter]);
+  }, [beneficiaries, options.searchTerm, options.statusFilter, options.identityStatusFilter, options.advancedFilters]);
 
   // إحصائيات
   const statistics = useMemo(() => {

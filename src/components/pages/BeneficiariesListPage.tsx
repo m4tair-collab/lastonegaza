@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Users, Search, Filter, Plus, Eye, Edit, Phone, MessageSquare, CheckCircle, Clock, AlertTriangle, Shield, UserCheck, Download, Star, UserPlus } from 'lucide-react';
+import { Users, Search, Filter, Plus, Eye, Edit, Phone, MessageSquare, CheckCircle, Clock, AlertTriangle, Shield, UserCheck, Download, Star, UserPlus, X, MapPin, DollarSign, Heart, RefreshCw } from 'lucide-react';
 import { type Beneficiary, type SystemUser } from '../../data/mockData';
 import { useBeneficiaries } from '../../hooks/useBeneficiaries';
 import { useAuth } from '../../context/AuthContext';
 import BeneficiaryProfileModal from '../BeneficiaryProfileModal';
 import BeneficiaryForm from '../BeneficiaryForm';
 import { Button, Card, Input, Badge, StatCard, Modal } from '../ui';
+import { mockBeneficiaries } from '../../data/mockData';
 
 interface BeneficiariesListPageProps {
   onNavigateToIndividualSend?: (beneficiaryId: string) => void;
@@ -18,6 +19,20 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
   const [modalType, setModalType] = useState<'add' | 'edit' | 'message'>('add');
+  const [showAdvancedFiltersModal, setShowAdvancedFiltersModal] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    governorate: '',
+    city: '',
+    district: '',
+    familyStatus: '',
+    familySize: '',
+    ageGroup: '',
+    economicLevel: '',
+    displacementStatus: '',
+    profession: '',
+    healthStatus: '',
+    medicalCondition: ''
+  });
   
   // استخدام Hook المخصص
   const { 
@@ -29,9 +44,142 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
   } = useBeneficiaries({
     organizationId: loggedInUser?.associatedType === 'organization' ? loggedInUser.associatedId : undefined,
     familyId: loggedInUser?.associatedType === 'family' ? loggedInUser.associatedId : undefined,
-    searchTerm
+    searchTerm,
+    advancedFilters
   });
 
+  // Get unique values for dynamic dropdowns
+  const governorates = [...new Set(mockBeneficiaries.map(b => b.detailedAddress.governorate))];
+  const cities = [...new Set(mockBeneficiaries
+    .filter(b => !advancedFilters.governorate || b.detailedAddress.governorate === advancedFilters.governorate)
+    .map(b => b.detailedAddress.city))];
+  const districts = [...new Set(mockBeneficiaries
+    .filter(b => 
+      (!advancedFilters.governorate || b.detailedAddress.governorate === advancedFilters.governorate) &&
+      (!advancedFilters.city || b.detailedAddress.city === advancedFilters.city)
+    )
+    .map(b => b.detailedAddress.district))];
+
+  const handleAdvancedFilterChange = (field: string, value: string) => {
+    setAdvancedFilters(prev => {
+      const newFilters = { ...prev, [field]: value };
+      
+      // Reset dependent filters when parent changes
+      if (field === 'governorate') {
+        newFilters.city = '';
+        newFilters.district = '';
+      } else if (field === 'city') {
+        newFilters.district = '';
+      }
+      
+      return newFilters;
+    });
+  };
+
+  const handleClearAdvancedFilters = () => {
+    setAdvancedFilters({
+      governorate: '',
+      city: '',
+      district: '',
+      familyStatus: '',
+      familySize: '',
+      ageGroup: '',
+      economicLevel: '',
+      displacementStatus: '',
+      profession: '',
+      healthStatus: '',
+      medicalCondition: ''
+    });
+  };
+
+  const handleApplyAdvancedFilters = () => {
+    setShowAdvancedFiltersModal(false);
+  };
+
+  const getActiveFiltersCount = () => {
+    return Object.values(advancedFilters).filter(value => value !== '').length;
+  };
+
+  const getActiveFilters = () => {
+    const activeFilters = [];
+    const filterLabels: { [key: string]: string } = {
+      governorate: 'المحافظة',
+      city: 'المدينة',
+      district: 'الحي',
+      familyStatus: 'الحالة العائلية',
+      familySize: 'حجم الأسرة',
+      ageGroup: 'الفئة العمرية',
+      economicLevel: 'المستوى الاقتصادي',
+      displacementStatus: 'حالة النزوح',
+      profession: 'المهنة',
+      healthStatus: 'الحالة الصحية',
+      medicalCondition: 'الحالة الطبية'
+    };
+
+    Object.entries(advancedFilters).forEach(([key, value]) => {
+      if (value) {
+        activeFilters.push({
+          key,
+          label: filterLabels[key],
+          value: getFilterDisplayValue(key, value)
+        });
+      }
+    });
+
+    return activeFilters;
+  };
+
+  const getFilterDisplayValue = (key: string, value: string): string => {
+    const displayValues: { [key: string]: { [value: string]: string } } = {
+      familyStatus: {
+        'head_of_family': 'رب أسرة',
+        'spouse': 'زوج/زوجة',
+        'child': 'ابن/ابنة',
+        'orphan_guardian': 'معيل أيتام',
+        'family_with_orphans': 'أسرة لديها أيتام',
+        'elderly': 'كبير سن',
+        'disabled': 'من ذوي الاحتياجات الخاصة'
+      },
+      familySize: {
+        'small': 'صغيرة (1-3 أفراد)',
+        'medium': 'متوسطة (4-7 أفراد)',
+        'large': 'كبيرة (8+ أفراد)'
+      },
+      ageGroup: {
+        'child': 'طفل (أقل من 18)',
+        'adult': 'بالغ (18-60)',
+        'elderly': 'كبير سن (60+)'
+      },
+      economicLevel: {
+        'very_poor': 'فقير جداً',
+        'poor': 'فقير',
+        'moderate': 'متوسط',
+        'good': 'ميسور'
+      },
+      displacementStatus: {
+        'displaced': 'نازح',
+        'not_displaced': 'غير نازح',
+        'returnee': 'عائد لمنزله'
+      },
+      healthStatus: {
+        'has_medical': 'لديه حالة مرضية',
+        'diabetes': 'مرض السكري',
+        'hypertension': 'ضغط الدم',
+        'disability': 'إعاقة',
+        'chronic': 'مرض مزمن',
+        'healthy': 'سليم'
+      }
+    };
+    
+    return displayValues[key]?.[value] || value;
+  };
+
+  const removeAdvancedFilter = (filterKey: string) => {
+    setAdvancedFilters(prev => ({
+      ...prev,
+      [filterKey]: ''
+    }));
+  };
   const handleViewBeneficiary = (beneficiary: Beneficiary) => {
     setSelectedBeneficiary(beneficiary);
     setShowDetailsModal(true);
@@ -116,10 +264,50 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
               onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1"
           />
-          <Button variant="secondary" icon={Filter} iconPosition="right">
-            فلترة متقدمة
+          <Button 
+            variant="secondary" 
+            icon={Filter} 
+            iconPosition="right"
+            onClick={() => setShowAdvancedFiltersModal(true)}
+          >
+            فلترة متقدمة {getActiveFiltersCount() > 0 && `(${getActiveFiltersCount()})`}
           </Button>
         </div>
+        
+        {/* Active Filters Display */}
+        {getActiveFiltersCount() > 0 && (
+          <div className="mt-4 pt-4 border-t border-gray-200 bg-blue-50 rounded-lg p-3">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">الفلاتر النشطة:</h4>
+            <div className="flex flex-wrap gap-2">
+              {getActiveFilters().map((filter) => (
+                <Badge
+                  key={filter.key}
+                  variant="info"
+                  size="sm"
+                  className="flex items-center space-x-1 space-x-reverse"
+                >
+                  <span>{filter.label}: {filter.value}</span>
+                  <button
+                    onClick={() => removeAdvancedFilter(filter.key)}
+                    className="text-blue-600 hover:text-blue-800 ml-1"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              ))}
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={X}
+                iconPosition="right"
+                onClick={handleClearAdvancedFilters}
+                className="text-xs"
+              >
+                مسح الكل
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
 
       {/* Statistics Cards */}
@@ -363,6 +551,221 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
                 </>
               )}
             </div>
+        </Modal>
+      )}
+
+      {/* Advanced Filters Modal */}
+      {showAdvancedFiltersModal && (
+        <Modal
+          isOpen={showAdvancedFiltersModal}
+          onClose={() => setShowAdvancedFiltersModal(false)}
+          title="الفلاتر المتقدمة"
+          size="lg"
+        >
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 p-6">
+            <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {/* Geographic Filters */}
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                  <MapPin className="w-4 h-4 ml-2 text-green-600" />
+                  الفلاتر الجغرافية
+                </h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">المحافظة</label>
+                    <select
+                      value={advancedFilters.governorate}
+                      onChange={(e) => handleAdvancedFilterChange('governorate', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    >
+                      <option value="">جميع المحافظات</option>
+                      {governorates.map(gov => (
+                        <option key={gov} value={gov}>{gov}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">المدينة</label>
+                    <select
+                      value={advancedFilters.city}
+                      onChange={(e) => handleAdvancedFilterChange('city', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      disabled={!advancedFilters.governorate}
+                    >
+                      <option value="">
+                        {advancedFilters.governorate ? 'جميع المدن' : 'اختر المحافظة أولاً'}
+                      </option>
+                      {cities.map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">الحي</label>
+                    <select
+                      value={advancedFilters.district}
+                      onChange={(e) => handleAdvancedFilterChange('district', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      disabled={!advancedFilters.city}
+                    >
+                      <option value="">
+                        {advancedFilters.city ? 'جميع الأحياء' : 'اختر المدينة أولاً'}
+                      </option>
+                      {districts.map(district => (
+                        <option key={district} value={district}>{district}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Family and Social Status Filters */}
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                  <Users className="w-4 h-4 ml-2 text-purple-600" />
+                  الحالة العائلية والاجتماعية
+                </h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">الحالة العائلية</label>
+                    <select
+                      value={advancedFilters.familyStatus}
+                      onChange={(e) => handleAdvancedFilterChange('familyStatus', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">جميع الحالات</option>
+                      <option value="head_of_family">رب أسرة</option>
+                      <option value="spouse">زوج/زوجة</option>
+                      <option value="child">ابن/ابنة</option>
+                      <option value="orphan_guardian">معيل أيتام</option>
+                      <option value="family_with_orphans">أسرة لديها أيتام</option>
+                      <option value="elderly">كبير سن</option>
+                      <option value="disabled">من ذوي الاحتياجات الخاصة</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">حجم الأسرة</label>
+                    <select
+                      value={advancedFilters.familySize}
+                      onChange={(e) => handleAdvancedFilterChange('familySize', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    >
+                      <option value="">جميع الأحجام</option>
+                      <option value="small">صغيرة (1-3 أفراد)</option>
+                      <option value="medium">متوسطة (4-7 أفراد)</option>
+                      <option value="large">كبيرة (8+ أفراد)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">الفئة العمرية</label>
+                    <select
+                      value={advancedFilters.ageGroup}
+                      onChange={(e) => handleAdvancedFilterChange('ageGroup', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    >
+                      <option value="">جميع الأعمار</option>
+                      <option value="child">طفل (أقل من 18)</option>
+                      <option value="adult">بالغ (18-60)</option>
+                      <option value="elderly">كبير سن (60+)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Economic and Social Status Filters */}
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                  <DollarSign className="w-4 h-4 ml-2 text-orange-600" />
+                  الحالة الاقتصادية والاجتماعية
+                </h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">المستوى الاقتصادي</label>
+                    <select
+                      value={advancedFilters.economicLevel}
+                      onChange={(e) => handleAdvancedFilterChange('economicLevel', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    >
+                      <option value="">جميع المستويات</option>
+                      <option value="very_poor">فقير جداً</option>
+                      <option value="poor">فقير</option>
+                      <option value="moderate">متوسط</option>
+                      <option value="good">ميسور</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">حالة النزوح</label>
+                    <select
+                      value={advancedFilters.displacementStatus}
+                      onChange={(e) => handleAdvancedFilterChange('displacementStatus', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    >
+                      <option value="">جميع الحالات</option>
+                      <option value="displaced">نازح</option>
+                      <option value="not_displaced">غير نازح</option>
+                      <option value="returnee">عائد لمنزله</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">المهنة</label>
+                    <input
+                      type="text"
+                      placeholder="مثال: عامل، طبيب، مدرس..."
+                      value={advancedFilters.profession}
+                      onChange={(e) => handleAdvancedFilterChange('profession', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Health Status Filters */}
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                  <Heart className="w-4 h-4 ml-2 text-red-600" />
+                  الحالة الصحية
+                </h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">الحالة الصحية</label>
+                    <select
+                      value={advancedFilters.healthStatus}
+                      onChange={(e) => handleAdvancedFilterChange('healthStatus', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    >
+                      <option value="">جميع الحالات</option>
+                      <option value="has_medical">لديه حالة مرضية</option>
+                      <option value="diabetes">مرض السكري</option>
+                      <option value="hypertension">ضغط الدم</option>
+                      <option value="disability">إعاقة</option>
+                      <option value="chronic">مرض مزمن</option>
+                      <option value="healthy">سليم</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex space-x-3 space-x-reverse justify-center mt-6 pt-4 border-t border-gray-200">
+              <Button
+                variant="secondary"
+                icon={RefreshCw}
+                iconPosition="right"
+                onClick={handleClearAdvancedFilters}
+              >
+                مسح الفلاتر
+              </Button>
+              <Button
+                variant="primary"
+                icon={CheckCircle}
+                iconPosition="right"
+                onClick={handleApplyAdvancedFilters}
+              >
+                تطبيق الفلاتر
+              </Button>
+            </div>
+          </div>
         </Modal>
       )}
     </div>
