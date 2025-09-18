@@ -37,7 +37,7 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
   // Confirmation modal state
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
-    type: 'approve' | 'reupload' | 'batch-approve' | 'batch-reupload';
+    type: 'approve' | 'reupload' | 'batch-approve' | 'batch-reupload' | 'suspend';
     beneficiaryId?: string;
     beneficiaryIds?: string[];
     beneficiaryName?: string;
@@ -198,6 +198,15 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
     });
     setShowConfirmModal(true);
   };
+
+  const handleSuspendBeneficiary = (beneficiaryId: string, beneficiaryName: string) => {
+    setConfirmAction({
+      type: 'suspend',
+      beneficiaryId,
+      beneficiaryName
+    });
+    setShowConfirmModal(true);
+  };
   
   // Batch actions
   const handleBatchApprove = () => {
@@ -275,6 +284,18 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
             setSelectedBeneficiaries([]);
           }
           break;
+          
+        case 'suspend':
+          if (confirmAction.beneficiaryId) {
+            // محاكاة تعليق حساب المستفيد
+            const beneficiaryIndex = mockBeneficiaries.findIndex(b => b.id === confirmAction.beneficiaryId);
+            if (beneficiaryIndex !== -1) {
+              mockBeneficiaries[beneficiaryIndex].status = 'suspended';
+              mockBeneficiaries[beneficiaryIndex].updatedAt = new Date().toISOString();
+            }
+            logInfo(`تم تعليق حساب المستفيد: ${confirmAction.beneficiaryName}. تم إيقاف جميع الخدمات وسيتم إشعار المستفيد.`, 'StatusManagementPage');
+          }
+          break;
       }
       
       // Force re-render by updating state
@@ -314,6 +335,13 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
           title: 'طلب إعادة رفع الوثائق (جماعي)',
           message: `هل تريد طلب إعادة رفع الوثائق من ${confirmAction.beneficiaryIds?.length} مستفيد؟\n\nسيتم:\n• إرسال إشعارات جماعية عبر الرسائل النصية\n• تغيير حالة التوثيق لجميع المحددين إلى "بانتظار إعادة الرفع"\n• إرسال تعليمات واضحة لكل مستفيد`,
           confirmText: `إرسال طلب إعادة الرفع لـ ${confirmAction.beneficiaryIds?.length} مستفيد`,
+          variant: 'warning' as const
+        };
+      case 'suspend':
+        return {
+          title: 'تأكيد تعليق حساب المستفيد',
+          message: `هل أنت متأكد من تعليق حساب المستفيد "${confirmAction.beneficiaryName}"؟\n\nعند تعليق الحساب:\n• سيتم إيقاف جميع الخدمات للمستفيد\n• لن يتمكن من استلام طرود جديدة\n• ستبقى بياناته محفوظة للمراجعة\n• يمكن إعادة تفعيل الحساب لاحقاً\n\nيمكن مراجعة الحساب وإعادة تفعيله في أي وقت.`,
+          confirmText: 'تعليق الحساب',
           variant: 'warning' as const
         };
       default:
@@ -937,6 +965,10 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
           onRequestReupload={(beneficiaryId, beneficiaryName) => {
             setShowDetailsModal(false);
             handleRequestReupload(beneficiaryId, beneficiaryName);
+          }}
+          onSuspendBeneficiary={(beneficiaryId, beneficiaryName) => {
+            setShowDetailsModal(false);
+            handleSuspendBeneficiary(beneficiaryId, beneficiaryName);
           }}
         />
       )}

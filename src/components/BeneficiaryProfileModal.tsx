@@ -11,6 +11,7 @@ interface BeneficiaryProfileModalProps {
   onEditBeneficiary?: (beneficiary: Beneficiary) => void;
   onApproveIdentity?: (beneficiaryId: string, beneficiaryName: string) => void;
   onRequestReupload?: (beneficiaryId: string, beneficiaryName: string) => void;
+  onSuspendBeneficiary?: (beneficiaryId: string, beneficiaryName: string) => void;
 }
 
 export default function BeneficiaryProfileModal({
@@ -19,7 +20,8 @@ export default function BeneficiaryProfileModal({
   onNavigateToIndividualSend,
   onEditBeneficiary,
   onApproveIdentity,
-  onRequestReupload
+  onRequestReupload,
+  onSuspendBeneficiary
 }: BeneficiaryProfileModalProps) {
   const { logInfo } = useErrorLogger();
   const [showFullImageModal, setShowFullImageModal] = useState(false);

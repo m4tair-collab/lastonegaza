@@ -256,24 +256,26 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
       <Card>
         <div className="grid md:grid-cols-12 gap-4 items-end">
           <div className="md:col-span-8">
+            <Input
               placeholder="البحث في المستفيدين (الاسم، رقم الهوية، الهاتف)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="البحث في المستفيدين (الاسم، رقم الهوية، الهاتف)..."
+              className="flex-1"
+            />
           </div>
           <div className="md:col-span-4">
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1"
-          />
+            <Button
+              variant="secondary" 
+              icon={Filter} 
+              iconPosition="right"
               onClick={toggleAdvancedFilters}
               className="w-full"
-            variant="secondary" 
-            icon={Filter} 
-            iconPosition="right"
+            >
+              فلترة متقدمة {getActiveFiltersCount() > 0 && `(${getActiveFiltersCount()})`}
+            </Button>
           </div>
-            onClick={() => setShowAdvancedFiltersModal(true)}
-          >
+        </div>
+        
         {/* Advanced Filters Section */}
         {showAdvancedFilters && (
           <div className="mt-6 pt-6 border-t border-gray-200">
@@ -348,7 +350,7 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
                     </div>
                   </div>
                 </div>
-            فلترة متقدمة {getActiveFiltersCount() > 0 && `(${getActiveFiltersCount()})`}
+
                 {/* Family and Social Status Filters */}
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
                   <h4 className="font-medium text-gray-900 mb-3 flex items-center">
@@ -401,7 +403,7 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
                     </div>
                   </div>
                 </div>
-          </Button>
+
                 {/* Economic and Social Status Filters */}
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
                   <h4 className="font-medium text-gray-900 mb-3 flex items-center">
@@ -448,7 +450,7 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
                     </div>
                   </div>
                 </div>
-        </div>
+
                 {/* Health Status Filters */}
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
                   <h4 className="font-medium text-gray-900 mb-3 flex items-center">
