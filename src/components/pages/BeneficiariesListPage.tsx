@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Users, Search, Filter, Plus, Eye, Edit, Phone, MessageSquare, CheckCircle, Clock, AlertTriangle, Shield, UserCheck, Download, Star, UserPlus, X, MapPin, DollarSign, Heart, RefreshCw } from 'lucide-react';
+import { Users, Search, Filter, Plus, Eye, Edit, Phone, MessageSquare, CheckCircle, Clock, AlertTriangle, Shield, UserCheck, Download, Star, UserPlus, X, MapPin, DollarSign, Heart, RefreshCw, UserX } from 'lucide-react';
 import { type Beneficiary, type SystemUser } from '../../data/mockData';
 import { useBeneficiaries } from '../../hooks/useBeneficiaries';
 import { useAuth } from '../../context/AuthContext';
 import BeneficiaryProfileModal from '../BeneficiaryProfileModal';
 import BeneficiaryForm from '../BeneficiaryForm';
-import { Button, Card, Input, Badge, StatCard, Modal } from '../ui';
+import { Button, Card, Input, Badge, StatCard, Modal, ConfirmationModal } from '../ui';
 import { mockBeneficiaries } from '../../data/mockData';
 
 interface BeneficiariesListPageProps {
@@ -20,6 +20,12 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
   const [modalType, setModalType] = useState<'add' | 'edit' | 'message'>('add');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{
+    type: 'suspend';
+    beneficiaryId: string;
+    beneficiaryName: string;
+  } | null>(null);
   const [advancedFilters, setAdvancedFilters] = useState({
     governorate: '',
     city: '',
@@ -40,6 +46,7 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
     loading, 
     error, 
     statistics, 
+    updateBeneficiary,
     refetch 
   } = useBeneficiaries({
     organizationId: loggedInUser?.associatedType === 'organization' ? loggedInUser.associatedId : undefined,
@@ -201,6 +208,57 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
     if (confirm(`هل تريد الاتصال بالرقم ${phone}؟`)) {
       window.open(`tel:${phone}`);
     }
+  };
+
+  const handleSuspendBeneficiary = (beneficiary: Beneficiary) => {
+    setConfirmAction({
+      type: 'suspend',
+      beneficiaryId: beneficiary.id,
+      beneficiaryName: beneficiary.name
+    });
+    setShowConfirmModal(true);
+  };
+
+  const executeConfirmedAction = async () => {
+    if (!confirmAction) return;
+    
+    try {
+      if (confirmAction.type === 'suspend') {
+        // تحديث حالة المستفيد إلى موقوف
+        await updateBeneficiary(confirmAction.beneficiaryId, {
+          status: 'suspended',
+          updatedAt: new Date().toISOString(),
+          updatedBy: 'admin'
+        });
+        
+        // تحديث البيانات الوهمية مباشرة للعرض الفوري
+        const beneficiaryIndex = mockBeneficiaries.findIndex(b => b.id === confirmAction.beneficiaryId);
+        if (beneficiaryIndex !== -1) {
+          mockBeneficiaries[beneficiaryIndex].status = 'suspended';
+          mockBeneficiaries[beneficiaryIndex].updatedAt = new Date().toISOString();
+        }
+        
+        // إعادة تحميل البيانات
+        refetch();
+      }
+    } catch (error) {
+      console.error('خطأ في تنفيذ الإجراء:', error);
+    }
+  };
+
+  const getConfirmationMessage = () => {
+    if (!confirmAction) return { title: '', message: '', confirmText: '', variant: 'primary' as const };
+    
+    if (confirmAction.type === 'suspend') {
+      return {
+        title: 'تأكيد تعليق حساب المستفيد',
+        message: `هل أنت متأكد من تعليق حساب المستفيد "${confirmAction.beneficiaryName}"؟\n\nعند تعليق الحساب:\n• سيتم إيقاف جميع الخدمات للمستفيد\n• لن يتمكن من استلام طرود جديدة\n• ستبقى بياناته محفوظة للمراجعة\n• يمكن إعادة تفعيل الحساب لاحقاً\n\nيمكن مراجعة الحساب وإعادة تفعيله في أي وقت.`,
+        confirmText: 'تعليق الحساب',
+        variant: 'warning' as const
+      };
+    }
+    
+    return { title: '', message: '', confirmText: '', variant: 'primary' as const };
   };
 
   const getStatusColor = (status: string) => {
@@ -705,6 +763,13 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
                           >
                             <Phone className="w-4 h-4" />
                           </button>
+                          <button 
+                            onClick={() => handleSuspendBeneficiary(beneficiary)}
+                            className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors" 
+                            title="تعليق الحساب"
+                          >
+                            <UserX className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -795,6 +860,21 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend }: Be
             </div>
         </Modal>
       )}
+
+      {/* Confirmation Modal for Suspend Action */}
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={() => {
+          setShowConfirmModal(false);
+          setConfirmAction(null);
+        }}
+        onConfirm={executeConfirmedAction}
+        title={getConfirmationMessage().title}
+        message={getConfirmationMessage().message}
+        confirmButtonText={getConfirmationMessage().confirmText}
+        confirmButtonVariant={getConfirmationMessage().variant}
+        type="warning"
+      />
 
     </div>
   );
