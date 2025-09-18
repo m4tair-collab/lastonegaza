@@ -12,6 +12,7 @@ import { Button, Card, StatCard, Badge } from './ui';
 
 // Import new page components
 import BeneficiariesListPage from './pages/BeneficiariesListPage';
+import BulkTasksPage from './pages/BulkTasksPage';
 import StatusManagementPage from './pages/StatusManagementPage';
 import DelayedBeneficiariesPage from './pages/DelayedBeneficiariesPage';
 import ActivityLogPage from './pages/ActivityLogPage';
@@ -51,6 +52,7 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [openMenus, setOpenMenus] = useState<string[]>(['beneficiaries', 'packages', 'organizations-families', 'distribution', 'reports-alerts', 'settings', 'development']);
   const [beneficiaryIdForIndividualSend, setBeneficiaryIdForIndividualSend] = useState<string | null>(null);
+  const [beneficiaryIdsForTasks, setBeneficiaryIdsForTasks] = useState<string[]>([]);
 
   // State for Supabase data
   const [stats, setStats] = useState<any>(calculateStats());
@@ -68,6 +70,11 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
     setActiveTab('individual-send');
   };
 
+  const handleNavigateToTasks = (beneficiaryIds: string[]) => {
+    setBeneficiaryIdsForTasks(beneficiaryIds);
+    setActiveTab('bulk-tasks');
+  };
+
   // Navigation structure with hierarchical organization
   const navItems: NavItem[] = [
     {
@@ -81,6 +88,7 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
       icon: Users,
       children: [
         { id: 'beneficiaries-list', name: 'قائمة المستفيدين', icon: Users },
+        { id: 'bulk-tasks', name: 'المهام الجماعية', icon: Send },
         { id: 'status-management', name: 'إدارة الحالات', icon: UserCheck },
         { id: 'delayed', name: 'المتأخرين', icon: Clock },
         { id: 'activity-log', name: 'سجل النشاط', icon: Activity }
@@ -265,6 +273,7 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
     const descriptions: { [key: string]: string } = {
       'overview': 'نظرة شاملة على النظام والأنشطة',
       'beneficiaries-list': 'إدارة جميع المستفيدين المسجلين في النظام',
+      'bulk-tasks': 'إنشاء مهام توزيع جماعية للمستفيدين المحددين',
       'status-management': 'تصنيف وإدارة حالات الأهلية للمستفيدين',
       'delayed': 'المستفيدين الذين لم يستلموا طرودهم في الوقت المحدد',
       'activity-log': 'سجل جميع الأنشطة والعمليات في النظام',
@@ -312,6 +321,30 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
           </div>
           <BeneficiariesListPage 
             onNavigateToIndividualSend={handleNavigateToIndividualSend}
+            onNavigateToTasks={handleNavigateToTasks}
+          />
+        </div>
+      );
+    }
+
+    if (activeTab === 'bulk-tasks') {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center space-x-4 space-x-reverse">
+            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+              <IconComponent className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900">{pageInfo.name}</h2>
+              <p className="text-gray-600 mt-1">{pageInfo.description}</p>
+            </div>
+          </div>
+          <BulkTasksPage 
+            preselectedBeneficiaryIds={beneficiaryIdsForTasks}
+            onNavigateBack={() => {
+              setActiveTab('beneficiaries-list');
+              setBeneficiaryIdsForTasks([]);
+            }}
           />
         </div>
       );
