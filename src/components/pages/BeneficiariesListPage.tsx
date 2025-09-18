@@ -83,7 +83,7 @@ export default function BeneficiariesListPage({
     statusFilter: statusFilter !== 'all' ? statusFilter : undefined,
     identityStatusFilter: identityStatusFilter !== 'all' ? identityStatusFilter : undefined,
     advancedFilters: {
-      governorate: governorateFilter !== 'all' ? governorateFilter : undefined
+      governorate: governorateFilter !== 'all' ? governorateFilter : undefined,
       city: advancedFilters.cityFilter !== 'all' ? advancedFilters.cityFilter : undefined,
       district: advancedFilters.districtFilter !== 'all' ? advancedFilters.districtFilter : undefined,
       familyStatus: advancedFilters.familyStatusFilter !== 'all' ? advancedFilters.familyStatusFilter : undefined,
@@ -568,25 +568,55 @@ export default function BeneficiariesListPage({
         <div className="space-y-4">
           {/* Basic Filters Row */}
           <div className="grid md:grid-cols-5 gap-4">
-          <div className="md:col-span-2">
-            <Input
-              type="text"
-              icon={Search}
-              iconPosition="right"
-              placeholder="البحث (الاسم، رقم الهوية، الهاتف)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          <div>
-            <select
-              value={identityStatusFilter}
-              onChange={(e) => setIdentityStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">جميع حالات التوثيق</option>
-              <option value="verified">موثق</option>
+            <div className="md:col-span-2">
+              <Input
+                type="text"
+                icon={Search}
+                iconPosition="right"
+                placeholder="البحث (الاسم، رقم الهوية، الهاتف)..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">جميع الحالات</option>
+                <option value="active">نشط</option>
+                <option value="pending">معلق</option>
+                <option value="suspended">متوقف</option>
+              </select>
+            </div>
+            
+            <div>
+              <select
+                value={identityStatusFilter}
+                onChange={(e) => setIdentityStatusFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">جميع حالات التوثيق</option>
+                <option value="verified">موثق</option>
+                <option value="pending">بانتظار التوثيق</option>
+                <option value="rejected">مرفوض التوثيق</option>
+              </select>
+            </div>
+            
+            <div>
+              <select
+                value={governorateFilter}
+                onChange={(e) => setGovernorateFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">جميع المحافظات</option>
+                {governorates.map(governorate => (
+                  <option key={governorate} value={governorate}>{governorate}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Advanced Filters Toggle */}
@@ -682,7 +712,7 @@ export default function BeneficiariesListPage({
                     ))}
                   </select>
                 </div>
-              <option value="pending">بانتظار التوثيق</option>
+
                 {/* Family Status Filters */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">الحالة العائلية</label>
@@ -701,7 +731,7 @@ export default function BeneficiariesListPage({
                     <option value="disabled">ذوي الاحتياجات الخاصة</option>
                   </select>
                 </div>
-              <option value="rejected">مرفوض التوثيق</option>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">حجم الأسرة</label>
                   <select
@@ -715,7 +745,7 @@ export default function BeneficiariesListPage({
                     <option value="large">كبيرة (8+ أفراد)</option>
                   </select>
                 </div>
-            </select>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">الفئة العمرية</label>
                   <select
@@ -729,7 +759,7 @@ export default function BeneficiariesListPage({
                     <option value="elderly">كبار السن (60+)</option>
                   </select>
                 </div>
-          </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">المستوى الاقتصادي</label>
                   <select
@@ -744,7 +774,7 @@ export default function BeneficiariesListPage({
                     <option value="good">ميسور</option>
                   </select>
                 </div>
-          
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">المهنة</label>
                   <input
@@ -755,7 +785,7 @@ export default function BeneficiariesListPage({
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   />
                 </div>
-          <div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">الحالة الصحية</label>
                   <select
@@ -768,7 +798,7 @@ export default function BeneficiariesListPage({
                     <option value="healthy">سليم صحياً</option>
                   </select>
                 </div>
-            <select
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">حالة مرضية محددة</label>
                   <input
@@ -779,7 +809,7 @@ export default function BeneficiariesListPage({
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   />
                 </div>
-              value={statusFilter}
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">آخر استلام</label>
                   <select
@@ -795,7 +825,7 @@ export default function BeneficiariesListPage({
                     <option value="year">خلال سنة</option>
                   </select>
                 </div>
-              onChange={(e) => setStatusFilter(e.target.value)}
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">تاريخ الإضافة</label>
                   <select
@@ -812,7 +842,7 @@ export default function BeneficiariesListPage({
               </div>
             </div>
           )}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        </div>
       </Card>
 
       {/* Batch Actions Toolbar */}
