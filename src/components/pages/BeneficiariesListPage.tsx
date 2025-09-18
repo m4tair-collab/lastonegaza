@@ -26,20 +26,6 @@ export default function BeneficiariesListPage({
   const [identityStatusFilter, setIdentityStatusFilter] = useState('all');
   const [governorateFilter, setGovernorateFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [advancedFilters, setAdvancedFilters] = useState({
-    cityFilter: 'all',
-    districtFilter: 'all',
-    familyStatusFilter: 'all',
-    familySizeFilter: 'all',
-    ageGroupFilter: 'all',
-    economicLevelFilter: 'all',
-    professionFilter: '',
-    healthStatusFilter: 'all',
-    medicalConditionFilter: '',
-    organizationFilter: 'all',
-    lastReceivedFilter: 'all'
-  });
   
   // State for pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -83,33 +69,12 @@ export default function BeneficiariesListPage({
     statusFilter: statusFilter !== 'all' ? statusFilter : undefined,
     identityStatusFilter: identityStatusFilter !== 'all' ? identityStatusFilter : undefined,
     advancedFilters: {
-      governorate: governorateFilter !== 'all' ? governorateFilter : undefined,
-      city: advancedFilters.cityFilter !== 'all' ? advancedFilters.cityFilter : undefined,
-      district: advancedFilters.districtFilter !== 'all' ? advancedFilters.districtFilter : undefined,
-      familyStatus: advancedFilters.familyStatusFilter !== 'all' ? advancedFilters.familyStatusFilter : undefined,
-      familySize: advancedFilters.familySizeFilter !== 'all' ? advancedFilters.familySizeFilter : undefined,
-      ageGroup: advancedFilters.ageGroupFilter !== 'all' ? advancedFilters.ageGroupFilter : undefined,
-      economicLevel: advancedFilters.economicLevelFilter !== 'all' ? advancedFilters.economicLevelFilter : undefined,
-      profession: advancedFilters.professionFilter || undefined,
-      healthStatus: advancedFilters.healthStatusFilter !== 'all' ? advancedFilters.healthStatusFilter : undefined,
-      medicalCondition: advancedFilters.medicalConditionFilter || undefined
+      governorate: governorateFilter !== 'all' ? governorateFilter : undefined
     }
   });
 
   // Get unique values for filters
   const governorates = [...new Set(allBeneficiaries.map(b => b.detailedAddress.governorate))];
-  const cities = [...new Set(allBeneficiaries
-    .filter(b => governorateFilter === 'all' || b.detailedAddress.governorate === governorateFilter)
-    .map(b => b.detailedAddress.city))];
-  const districts = [...new Set(allBeneficiaries
-    .filter(b => 
-      (governorateFilter === 'all' || b.detailedAddress.governorate === governorateFilter) &&
-      (advancedFilters.cityFilter === 'all' || b.detailedAddress.city === advancedFilters.cityFilter)
-    )
-    .map(b => b.detailedAddress.district))];
-  const organizations = [...new Set(allBeneficiaries
-    .filter(b => b.organizationId)
-    .map(b => b.organizationId))];
   
   // Apply additional filters that aren't handled by the hook
   const getFilteredBeneficiaries = () => {
@@ -321,17 +286,6 @@ export default function BeneficiariesListPage({
     if (identityStatusFilter !== 'all') filters.push({ key: 'identity', label: 'حالة التوثيق', value: identityStatusFilter });
     if (governorateFilter !== 'all') filters.push({ key: 'governorate', label: 'المحافظة', value: governorateFilter });
     if (dateFilter !== 'all') filters.push({ key: 'date', label: 'التاريخ', value: dateFilter });
-    if (advancedFilters.cityFilter !== 'all') filters.push({ key: 'city', label: 'المدينة', value: advancedFilters.cityFilter });
-    if (advancedFilters.districtFilter !== 'all') filters.push({ key: 'district', label: 'الحي', value: advancedFilters.districtFilter });
-    if (advancedFilters.familyStatusFilter !== 'all') filters.push({ key: 'familyStatus', label: 'الحالة العائلية', value: advancedFilters.familyStatusFilter });
-    if (advancedFilters.familySizeFilter !== 'all') filters.push({ key: 'familySize', label: 'حجم الأسرة', value: advancedFilters.familySizeFilter });
-    if (advancedFilters.ageGroupFilter !== 'all') filters.push({ key: 'ageGroup', label: 'الفئة العمرية', value: advancedFilters.ageGroupFilter });
-    if (advancedFilters.economicLevelFilter !== 'all') filters.push({ key: 'economicLevel', label: 'المستوى الاقتصادي', value: advancedFilters.economicLevelFilter });
-    if (advancedFilters.professionFilter) filters.push({ key: 'profession', label: 'المهنة', value: advancedFilters.professionFilter });
-    if (advancedFilters.healthStatusFilter !== 'all') filters.push({ key: 'healthStatus', label: 'الحالة الصحية', value: advancedFilters.healthStatusFilter });
-    if (advancedFilters.medicalConditionFilter) filters.push({ key: 'medicalCondition', label: 'الحالة المرضية', value: advancedFilters.medicalConditionFilter });
-    if (advancedFilters.organizationFilter !== 'all') filters.push({ key: 'organization', label: 'المؤسسة', value: advancedFilters.organizationFilter });
-    if (advancedFilters.lastReceivedFilter !== 'all') filters.push({ key: 'lastReceived', label: 'آخر استلام', value: advancedFilters.lastReceivedFilter });
     return filters;
   };
   
@@ -565,9 +519,7 @@ export default function BeneficiariesListPage({
 
       {/* Search and Filters */}
       <Card>
-        <div className="space-y-4">
-          {/* Basic Filters Row */}
-          <div className="grid md:grid-cols-5 gap-4">
+        <div className="grid md:grid-cols-5 gap-4">
           <div className="md:col-span-2">
             <Input
               type="text"
@@ -601,250 +553,22 @@ export default function BeneficiariesListPage({
               <option value="all">جميع الحالات</option>
               <option value="active">نشط</option>
               <option value="pending">معلق</option>
-              <option value="suspended">متوقف</option>
+              <option value="suspended">موقوف</option>
             </select>
           </div>
           
           <div>
             <select
               value={governorateFilter}
-              onChange={(e) => {
-                setGovernorateFilter(e.target.value);
-                setAdvancedFilters(prev => ({ ...prev, cityFilter: 'all', districtFilter: 'all' }));
-              }}
+              onChange={(e) => setGovernorateFilter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">جميع المحافظات</option>
-              {governorates.map(governorate => (
-                <option key={governorate} value={governorate}>{governorate}</option>
+              {governorates.map(gov => (
+                <option key={gov} value={gov}>{gov}</option>
               ))}
             </select>
           </div>
-          </div>
-
-          {/* Advanced Filters Toggle */}
-          <div className="flex items-center justify-between">
-            <Button
-              variant="secondary"
-              icon={Filter}
-              iconPosition="right"
-              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              size="sm"
-            >
-              {showAdvancedFilters ? 'إخفاء الفلاتر المتقدمة' : 'إظهار الفلاتر المتقدمة'}
-            </Button>
-            
-            {getActiveFilters().length > 0 && (
-              <div className="flex items-center space-x-2 space-x-reverse">
-                <span className="text-sm text-gray-600">الفلاتر النشطة:</span>
-                <div className="flex flex-wrap gap-1">
-                  {getActiveFilters().slice(0, 3).map((filter) => (
-                    <Badge key={filter.key} variant="info" size="sm">
-                      {filter.label}: {filter.value}
-                    </Badge>
-                  ))}
-                  {getActiveFilters().length > 3 && (
-                    <Badge variant="neutral" size="sm">
-                      +{getActiveFilters().length - 3} أخرى
-                    </Badge>
-                  )}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setStatusFilter('all');
-                    setIdentityStatusFilter('all');
-                    setGovernorateFilter('all');
-                    setDateFilter('all');
-                    setAdvancedFilters({
-                      cityFilter: 'all',
-                      districtFilter: 'all',
-                      familyStatusFilter: 'all',
-                      familySizeFilter: 'all',
-                      ageGroupFilter: 'all',
-                      economicLevelFilter: 'all',
-                      professionFilter: '',
-                      healthStatusFilter: 'all',
-                      medicalConditionFilter: '',
-                      organizationFilter: 'all',
-                      lastReceivedFilter: 'all'
-                    });
-                  }}
-                >
-                  مسح الفلاتر
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* Advanced Filters Panel */}
-          {showAdvancedFilters && (
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-              <h4 className="font-medium text-gray-900 mb-4">الفلاتر المتقدمة</h4>
-              
-              <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {/* Geographic Filters */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">المدينة / المخيم</label>
-                  <select
-                    value={advancedFilters.cityFilter}
-                    onChange={(e) => {
-                      setAdvancedFilters(prev => ({ ...prev, cityFilter: e.target.value, districtFilter: 'all' }));
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="all">جميع المدن</option>
-                    {cities.map(city => (
-                      <option key={city} value={city}>{city}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">الحي / المنطقة</label>
-                  <select
-                    value={advancedFilters.districtFilter}
-                    onChange={(e) => setAdvancedFilters(prev => ({ ...prev, districtFilter: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="all">جميع الأحياء</option>
-                    {districts.map(district => (
-                      <option key={district} value={district}>{district}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Family Status Filters */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">الحالة العائلية</label>
-                  <select
-                    value={advancedFilters.familyStatusFilter}
-                    onChange={(e) => setAdvancedFilters(prev => ({ ...prev, familyStatusFilter: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="all">جميع الحالات العائلية</option>
-                    <option value="head_of_family">رب الأسرة</option>
-                    <option value="spouse">الزوج/الزوجة</option>
-                    <option value="child">الأطفال</option>
-                    <option value="orphan_guardian">ولي أيتام</option>
-                    <option value="family_with_orphans">عائلة بها أيتام</option>
-                    <option value="elderly">كبار السن (60+)</option>
-                    <option value="disabled">ذوي الاحتياجات الخاصة</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">حجم الأسرة</label>
-                  <select
-                    value={advancedFilters.familySizeFilter}
-                    onChange={(e) => setAdvancedFilters(prev => ({ ...prev, familySizeFilter: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="all">جميع الأحجام</option>
-                    <option value="small">صغيرة (1-3 أفراد)</option>
-                    <option value="medium">متوسطة (4-7 أفراد)</option>
-                    <option value="large">كبيرة (8+ أفراد)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">الفئة العمرية</label>
-                  <select
-                    value={advancedFilters.ageGroupFilter}
-                    onChange={(e) => setAdvancedFilters(prev => ({ ...prev, ageGroupFilter: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="all">جميع الأعمار</option>
-                    <option value="child">أطفال (أقل من 18)</option>
-                    <option value="adult">بالغين (18-59)</option>
-                    <option value="elderly">كبار السن (60+)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">المستوى الاقتصادي</label>
-                  <select
-                    value={advancedFilters.economicLevelFilter}
-                    onChange={(e) => setAdvancedFilters(prev => ({ ...prev, economicLevelFilter: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="all">جميع المستويات</option>
-                    <option value="very_poor">فقير جداً</option>
-                    <option value="poor">فقير</option>
-                    <option value="moderate">متوسط</option>
-                    <option value="good">ميسور</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">المهنة</label>
-                  <input
-                    type="text"
-                    value={advancedFilters.professionFilter}
-                    onChange={(e) => setAdvancedFilters(prev => ({ ...prev, professionFilter: e.target.value }))}
-                    placeholder="البحث في المهن..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">الحالة الصحية</label>
-                  <select
-                    value={advancedFilters.healthStatusFilter}
-                    onChange={(e) => setAdvancedFilters(prev => ({ ...prev, healthStatusFilter: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="all">جميع الحالات الصحية</option>
-                    <option value="has_medical">لديه حالات مرضية</option>
-                    <option value="healthy">سليم صحياً</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">حالة مرضية محددة</label>
-                  <input
-                    type="text"
-                    value={advancedFilters.medicalConditionFilter}
-                    onChange={(e) => setAdvancedFilters(prev => ({ ...prev, medicalConditionFilter: e.target.value }))}
-                    placeholder="مثال: السكري، ضغط الدم..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">آخر استلام</label>
-                  <select
-                    value={advancedFilters.lastReceivedFilter}
-                    onChange={(e) => setAdvancedFilters(prev => ({ ...prev, lastReceivedFilter: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="all">جميع التواريخ</option>
-                    <option value="never">لم يستلم أبداً</option>
-                    <option value="week">خلال أسبوع</option>
-                    <option value="month">خلال شهر</option>
-                    <option value="quarter">خلال 3 أشهر</option>
-                    <option value="year">خلال سنة</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">تاريخ الإضافة</label>
-                  <select
-                    value={dateFilter}
-                    onChange={(e) => setDateFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="all">جميع التواريخ</option>
-                    <option value="today">اليوم</option>
-                    <option value="week">هذا الأسبوع</option>
-                    <option value="month">هذا الشهر</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </Card>
 
