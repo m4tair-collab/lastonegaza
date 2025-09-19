@@ -662,8 +662,7 @@ export const mockFamilies: Family[] = [
     packagesDistributed: 45,
     completionRate: 93,
     location: 'خان يونس - الكتيبة',
-    createdAt: '2024-01-10',
-    supportingOrganizationId: instUnrwaId // مدعومة من الأونروا
+    createdAt: '2024-01-10'
   },
   {
     id: family2Id,
@@ -679,8 +678,7 @@ export const mockFamilies: Family[] = [
     packagesDistributed: 11,
     completionRate: 85,
     location: 'خان يونس - القرارة',
-    createdAt: '2024-02-05',
-    supportingOrganizationId: instWfpId // مدعومة من برنامج الغذاء العالمي
+    createdAt: '2024-02-05'
   },
   {
     id: family3Id,
@@ -696,8 +694,7 @@ export const mockFamilies: Family[] = [
     packagesDistributed: 1,
     completionRate: 100,
     location: 'خان يونس - الفخاري',
-    createdAt: '2024-01-25',
-    supportingOrganizationId: crsOrgId // مدعومة من CRS
+    createdAt: '2024-01-25'
   }
 ];
 
@@ -1493,6 +1490,31 @@ export const getBeneficiariesByFamily = (familyId: string): Beneficiary[] => {
   return mockBeneficiaries.filter(b => b.familyId === familyId);
 };
 
+// دالة لحساب إحصائيات دفعة التوزيع
+export const calculateBatchStatistics = (batchId: string) => {
+  const batchTasks = getTasksByBatch(batchId);
+  const totalTasks = batchTasks.length;
+  const deliveredTasks = batchTasks.filter(task => task.status === 'delivered').length;
+  const failedTasks = batchTasks.filter(task => task.status === 'failed').length;
+  const pendingTasks = batchTasks.filter(task => task.status === 'pending').length;
+  const inProgressTasks = batchTasks.filter(task => task.status === 'in_progress').length;
+  const assignedTasks = batchTasks.filter(task => task.status === 'assigned').length;
+  const rescheduledTasks = batchTasks.filter(task => task.status === 'rescheduled').length;
+  
+  const successRate = totalTasks > 0 ? ((deliveredTasks / totalTasks) * 100) : 0;
+  
+  return {
+    totalTasks,
+    deliveredTasks,
+    failedTasks,
+    pendingTasks,
+    inProgressTasks,
+    assignedTasks,
+    rescheduledTasks,
+    successRate: Math.round(successRate * 10) / 10 // تقريب لرقم عشري واحد
+  };
+};
+
 export const getPackagesByBeneficiary = (beneficiaryId: string): Package[] => {
   return mockPackages.filter(p => p.beneficiaryId === beneficiaryId);
 };
@@ -1528,24 +1550,6 @@ export const getTasksByBatch = (batchId: string): Task[] => {
 
 export const getBatchesByOrganization = (organizationId: string): DistributionBatch[] => {
   return mockDistributionBatches.filter(batch => batch.organizationId === organizationId);
-};
-
-export const calculateBatchStatistics = (batchId: string) => {
-  const batchTasks = getTasksByBatch(batchId);
-  const totalTasks = batchTasks.length;
-  const deliveredTasks = batchTasks.filter(t => t.status === 'delivered').length;
-  const failedTasks = batchTasks.filter(t => t.status === 'failed').length;
-  const pendingTasks = batchTasks.filter(t => ['pending', 'assigned', 'in_progress', 'rescheduled'].includes(t.status)).length;
-  
-  return {
-    totalTasks,
-    totalBeneficiaries: totalTasks, // كل مهمة = مستفيد واحد
-    deliveredTasks,
-    failedTasks,
-    pendingTasks,
-    deliveryRate: totalTasks > 0 ? Math.round((deliveredTasks / totalTasks) * 100) : 0,
-    failureRate: totalTasks > 0 ? Math.round((failedTasks / totalTasks) * 100) : 0
-  };
 };
 
 // Statistics calculations
