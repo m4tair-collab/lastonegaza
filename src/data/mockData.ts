@@ -1491,9 +1491,6 @@ export const getBeneficiariesByFamily = (familyId: string): Beneficiary[] => {
 };
 
 // دالة لحساب إحصائيات دفعة التوزيع
-export const getBatchStatistics = (batchId: string) => {
-  const batchTasks = mockTasks.filter(task => task.batchId === batchId);
-  const totalTasks = batchTasks.length;
   const deliveredTasks = batchTasks.filter(task => task.status === 'delivered').length;
   const failedTasks = batchTasks.filter(task => task.status === 'failed').length;
   const pendingTasks = batchTasks.filter(task => task.status === 'pending').length;
