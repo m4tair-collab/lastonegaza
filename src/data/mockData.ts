@@ -1435,3 +1435,141 @@ export const calculateStats = () => {
     deliveryRate: totalPackages > 0 ? Math.round((deliveredPackages / totalPackages) * 100) : 0
   };
 };
+
+// دالة مساعدة لإضافة أو تحديث مستفيد من الاستيراد
+export const addOrUpdateBeneficiaryFromImport = (importedData: {
+  name: string;
+  nationalId: string;
+  phone?: string;
+  alternativePhone?: string;
+}): { beneficiary: Beneficiary; isNew: boolean; updated: string[] } => {
+  const existingIndex = mockBeneficiaries.findIndex(b => b.nationalId === importedData.nationalId);
+  const updated: string[] = [];
+  
+  if (existingIndex !== -1) {
+    // تحديث مستفيد موجود
+    const existing = mockBeneficiaries[existingIndex];
+    
+    // تحديث الاسم إذا كان مختلفاً
+    if (existing.name !== importedData.name) {
+      existing.name = importedData.name;
+      existing.fullName = importedData.name; // تحديث الاسم الكامل أيضاً
+      updated.push('الاسم');
+    }
+    
+    // تحديث رقم الهاتف إذا كان مختلفاً
+    if (importedData.phone && existing.phone !== importedData.phone) {
+      existing.phone = importedData.phone;
+      updated.push('رقم الهاتف');
+    }
+    
+    // تحديث تاريخ التعديل
+    existing.updatedAt = new Date().toISOString();
+    existing.updatedBy = 'import_system';
+    
+    return { beneficiary: existing, isNew: false, updated };
+  } else {
+    // إضافة مستفيد جديد
+    const newBeneficiary: Beneficiary = {
+      id: `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: importedData.name,
+      fullName: importedData.name,
+      nationalId: importedData.nationalId,
+      dateOfBirth: '1990-01-01', // تاريخ افتراضي
+      gender: 'male', // جنس افتراضي
+      phone: importedData.phone || '',
+      address: 'غير محدد - مستورد من ملف',
+      detailedAddress: {
+        governorate: 'غير محدد',
+        city: 'غير محدد',
+        district: 'غير محدد',
+        street: 'غير محدد',
+        additionalInfo: 'مستورد من ملف Excel/CSV'
+      },
+      location: { lat: 31.3469, lng: 34.3029 }, // موقع افتراضي في غزة
+      organizationId: undefined,
+      familyId: undefined,
+      relationToFamily: undefined,
+      isHeadOfFamily: false,
+      spouseId: null,
+      childrenIds: [],
+      parentId: null,
+      medicalConditions: [],
+      profession: 'غير محدد',
+      maritalStatus: 'single',
+      economicLevel: 'poor',
+      membersCount: 1,
+      additionalDocuments: [],
+      identityStatus: 'pending',
+      identityImageUrl: undefined,
+      status: 'active',
+      eligibilityStatus: 'under_review',
+      lastReceived: new Date().toISOString().split('T')[0],
+      totalPackages: 0,
+      notes: `مستورد من ملف Excel/CSV في ${new Date().toLocaleDateString('ar-SA')}${importedData.alternativePhone ? ` - هاتف بديل: ${importedData.alternativePhone}` : ''}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: 'import_system',
+      updatedBy: 'import_system'
+    };
+    
+    mockBeneficiaries.unshift(newBeneficiary);
+    return { beneficiary: newBeneficiary, isNew: true, updated: [] };
+  }
+};
+
+// دالة لإنشاء قالب CSV للتحميل
+export const generateBeneficiariesCSVTemplate = (): string => {
+  const headers = ['الاسم', 'رقم الهوية', 'رقم الهاتف', 'رقم الهاتف البديل'];
+  const sampleData = [
+    ['أحمد محمد الخالدي', '900123456', '0597123456', '0598123456'],
+    ['فاطمة سالم النجار', '900234567', '0598234567', ''],
+    ['محمد علي الغزاوي', '900345678', '0599345678', '0597345678'],
+    ['سارة أحمد الفرا', '900456789', '0596456789', ''],
+    ['خالد يوسف النجار', '900567890', '0595567890', '0599567890']
+  ];
+  
+  const csvContent = [headers, ...sampleData]
+    .map(row => row.map(cell => `"${cell}"`).join(','))
+    .join('\n');
+    
+  return csvContent;
+};
+
+// دالة للتحقق من صحة بيانات المستفيد المستورد
+export const validateImportedBeneficiary = (data: any): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+  
+  // التحقق من الاسم
+  if (!data.name || typeof data.name !== 'string' || data.name.trim().length < 2) {
+    errors.push('الاسم مطلوب ويجب أن يكون أكثر من حرفين');
+  }
+  
+  // التحقق من رقم الهوية
+  if (!data.nationalId || typeof data.nationalId !== 'string') {
+    errors.push('رقم الهوية مطلوب');
+  } else {
+    const cleanNationalId = data.nationalId.toString().trim();
+    if (!/^\d{9}$/.test(cleanNationalId)) {
+      errors.push('رقم الهوية يجب أن يكون 9 أرقام بالضبط');
+    }
+  }
+  
+  // التحقق من رقم الهاتف (اختياري)
+  if (data.phone && typeof data.phone === 'string') {
+    const cleanPhone = data.phone.toString().trim();
+    if (cleanPhone && !/^05\d{8}$/.test(cleanPhone)) {
+      errors.push('رقم الهاتف يجب أن يبدأ بـ 05 ويتكون من 10 أرقام');
+    }
+  }
+  
+  // التحقق من رقم الهاتف البديل (اختياري)
+  if (data.alternativePhone && typeof data.alternativePhone === 'string') {
+    const cleanAltPhone = data.alternativePhone.toString().trim();
+    if (cleanAltPhone && !/^05\d{8}$/.test(cleanAltPhone)) {
+      errors.push('رقم الهاتف البديل يجب أن يبدأ بـ 05 ويتكون من 10 أرقام');
+    }
+  }
+  
+  return { isValid: errors.length === 0, errors };
+};

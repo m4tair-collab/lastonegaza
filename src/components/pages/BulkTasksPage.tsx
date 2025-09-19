@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Package, Users, Send, CheckCircle, AlertTriangle, Clock, Building2, Search, Filter, Plus, Eye, Edit, X, ArrowLeft, Calendar, MapPin, Phone, FileText, Star, TrendingUp } from 'lucide-react';
+import { Package, Users, Send, CheckCircle, AlertTriangle, Clock, Building2, Search, Filter, Plus, Eye, Edit, X, ArrowLeft, Calendar, MapPin, Phone, FileText, Star, TrendingUp, Upload, Download, RefreshCw, UserPlus, Trash2 } from 'lucide-react';
 import { 
   mockBeneficiaries, 
   mockOrganizations, 
   mockPackageTemplates,
+  addOrUpdateBeneficiaryFromImport,
+  generateBeneficiariesCSVTemplate,
+  validateImportedBeneficiary,
   type Beneficiary,
   type Organization,
   type PackageTemplate
@@ -27,6 +30,19 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
   const [scheduledDate, setScheduledDate] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  
+  // حالة استيراد المستفيدين
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResults, setImportResults] = useState<{
+    total: number;
+    imported: number;
+    updated: number;
+    errors: Array<{ row: number; errors: string[] }>;
+    importedBeneficiaries: Beneficiary[];
+  } | null>(null);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
 
   // Get beneficiaries data
   const allBeneficiaries = mockBeneficiaries;
@@ -89,6 +105,141 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
     setShowConfirmModal(false);
   };
 
+  // وظائف استيراد المستفيدين
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImportFile(file);
+    }
+  };
+
+  const handleImportBeneficiaries = async () => {
+    if (!importFile) {
+      setNotification({ message: 'يرجى اختيار ملف أولاً', type: 'error' });
+      setTimeout(() => setNotification(null), 3000);
+      return;
+    }
+
+    setIsImporting(true);
+    setImportResults(null);
+
+    try {
+      // محاكاة قراءة الملف
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // محاكاة تحليل البيانات من CSV
+      const mockCSVData = [
+        { name: 'أحمد محمد المستورد', nationalId: '900111111', phone: '0597111111', alternativePhone: '0598111111' },
+        { name: 'فاطمة سالم المستوردة', nationalId: '900222222', phone: '0597222222', alternativePhone: '' },
+        { name: 'محمد علي المستورد', nationalId: '900333333', phone: '0597333333', alternativePhone: '0598333333' },
+        { name: 'سارة أحمد المستوردة', nationalId: '900444444', phone: '0597444444', alternativePhone: '' },
+        { name: 'خالد يوسف المستورد', nationalId: '900555555', phone: '0597555555', alternativePhone: '0598555555' },
+        { name: 'مريم محمد المستوردة', nationalId: '900666666', phone: '0597666666', alternativePhone: '' },
+        { name: 'يوسف أحمد المستورد', nationalId: '900777777', phone: '0597777777', alternativePhone: '0598777777' },
+        { name: 'نور سالم المستوردة', nationalId: '900888888', phone: '0597888888', alternativePhone: '' }
+      ];
+
+      const results = {
+        total: mockCSVData.length,
+        imported: 0,
+        updated: 0,
+        errors: [] as Array<{ row: number; errors: string[] }>,
+        importedBeneficiaries: [] as Beneficiary[]
+      };
+
+      // معالجة كل صف
+      mockCSVData.forEach((rowData, index) => {
+        const validation = validateImportedBeneficiary(rowData);
+        
+        if (!validation.isValid) {
+          results.errors.push({
+            row: index + 2, // +2 لأن الصف الأول هو العناوين والفهرسة تبدأ من 1
+            errors: validation.errors
+          });
+          return;
+        }
+
+        try {
+          const result = addOrUpdateBeneficiaryFromImport({
+            name: rowData.name.trim(),
+            nationalId: rowData.nationalId.trim(),
+            phone: rowData.phone?.trim(),
+            alternativePhone: rowData.alternativePhone?.trim()
+          });
+
+          if (result.isNew) {
+            results.imported++;
+          } else if (result.updated.length > 0) {
+            results.updated++;
+          }
+
+          results.importedBeneficiaries.push(result.beneficiary);
+        } catch (error) {
+          results.errors.push({
+            row: index + 2,
+            errors: ['خطأ في معالجة البيانات']
+          });
+        }
+      });
+
+      setImportResults(results);
+
+      // إضافة المستفيدين المستوردين للقائمة المحددة
+      const newSelectedIds = results.importedBeneficiaries.map(b => b.id);
+      setSelectedBeneficiaries(prev => [...prev, ...newSelectedIds]);
+
+      // إشعار النجاح
+      setNotification({
+        message: `تم استيراد ${results.imported} مستفيد جديد وتحديث ${results.updated} مستفيد موجود`,
+        type: 'success'
+      });
+      setTimeout(() => setNotification(null), 5000);
+
+      logInfo(`تم استيراد ${results.imported + results.updated} مستفيد من ملف: ${importFile.name}`, 'BulkTasksPage');
+    } catch (error) {
+      setNotification({ message: 'حدث خطأ في استيراد الملف', type: 'error' });
+      setTimeout(() => setNotification(null), 3000);
+      logError(error as Error, 'BulkTasksPage');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const downloadCSVTemplate = () => {
+    const csvContent = generateBeneficiariesCSVTemplate();
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'قالب_المستفيدين.csv';
+    link.click();
+    URL.revokeObjectURL(link);
+    
+    setNotification({ message: 'تم تحميل قالب CSV بنجاح', type: 'success' });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const clearImportResults = () => {
+    setImportResults(null);
+    setImportFile(null);
+    setShowImportModal(false);
+  };
+
+  const getNotificationClasses = (type: 'success' | 'error' | 'warning') => {
+    switch (type) {
+      case 'success': return 'bg-green-100 border-green-200 text-green-800';
+      case 'error': return 'bg-red-100 border-red-200 text-red-800';
+      case 'warning': return 'bg-orange-100 border-orange-200 text-orange-800';
+    }
+  };
+
+  const getNotificationIcon = (type: 'success' | 'error' | 'warning') => {
+    switch (type) {
+      case 'success': return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case 'error': return <AlertTriangle className="w-5 h-5 text-red-600" />;
+      case 'warning': return <Clock className="w-5 h-5 text-orange-600" />;
+    }
+  };
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'urgent': return 'bg-red-100 text-red-800';
@@ -109,6 +260,17 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
 
   return (
     <div className="space-y-6">
+      {/* Notification */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-3 space-x-reverse ${getNotificationClasses(notification.type)}`}>
+          {getNotificationIcon(notification.type)}
+          <span className="font-medium">{notification.message}</span>
+          <button onClick={() => setNotification(null)} className="text-gray-500 hover:text-gray-700">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4 space-x-reverse">
@@ -126,6 +288,16 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
             <h2 className="text-2xl font-bold text-gray-900">إنشاء مهام جماعية</h2>
             <p className="text-gray-600 mt-1">إنشاء مهام توزيع لمجموعة من المستفيدين</p>
           </div>
+        </div>
+        <div className="flex space-x-3 space-x-reverse">
+          <Button
+            variant="secondary"
+            icon={Upload}
+            iconPosition="right"
+            onClick={() => setShowImportModal(true)}
+          >
+            استيراد مستفيدين
+          </Button>
         </div>
       </div>
 
@@ -211,7 +383,29 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
 
       {/* Add More Beneficiaries */}
       <Card>
-        <h3 className="text-lg font-bold text-gray-900 mb-4">إضافة مستفيدين إضافيين</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-900">إضافة مستفيدين إضافيين</h3>
+          <div className="flex space-x-2 space-x-reverse">
+            <Button
+              variant="secondary"
+              icon={Download}
+              iconPosition="right"
+              size="sm"
+              onClick={downloadCSVTemplate}
+            >
+              تحميل قالب CSV
+            </Button>
+            <Button
+              variant="primary"
+              icon={Upload}
+              iconPosition="right"
+              size="sm"
+              onClick={() => setShowImportModal(true)}
+            >
+              استيراد من ملف
+            </Button>
+          </div>
+        </div>
         
         <div className="mb-4">
           <Input
@@ -560,6 +754,239 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
         </Modal>
       )}
 
+      {/* Import Modal */}
+      {showImportModal && (
+        <Modal
+          isOpen={showImportModal}
+          onClose={() => {
+            if (!isImporting) {
+              clearImportResults();
+            }
+          }}
+          title="استيراد مستفيدين من ملف Excel/CSV"
+          size="lg"
+        >
+          <div className="p-6">
+            {!importResults ? (
+              <div className="space-y-6">
+                {/* File Upload Section */}
+                <div className="text-center">
+                  <div className="bg-blue-50 p-8 rounded-xl border-2 border-dashed border-blue-300 hover:border-blue-400 transition-colors">
+                    <Upload className="w-16 h-16 text-blue-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">اختر ملف Excel أو CSV</h4>
+                    <p className="text-gray-600 mb-4">
+                      يجب أن يحتوي الملف على: الاسم، رقم الهوية، رقم الهاتف (اختياري)، رقم الهاتف البديل (اختياري)
+                    </p>
+                    
+                    <input
+                      type="file"
+                      accept=".csv,.xlsx,.xls"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      id="beneficiaries-file-upload"
+                      disabled={isImporting}
+                    />
+                    <label
+                      htmlFor="beneficiaries-file-upload"
+                      className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors cursor-pointer inline-flex items-center"
+                    >
+                      <Upload className="w-4 h-4 ml-2" />
+                      اختيار ملف
+                    </label>
+                  </div>
+                  
+                  {importFile && (
+                    <div className="mt-4 bg-green-50 p-4 rounded-xl border border-green-200">
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <FileText className="w-5 h-5 text-green-600" />
+                        <div className="text-right">
+                          <p className="font-medium text-green-800">تم اختيار الملف: {importFile.name}</p>
+                          <p className="text-sm text-green-600">الحجم: {(importFile.size / 1024).toFixed(1)} KB</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Template Download */}
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-gray-900">تحميل قالب CSV جاهز</h4>
+                      <p className="text-sm text-gray-600">قالب يحتوي على أمثلة وتنسيق صحيح للبيانات</p>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      icon={Download}
+                      iconPosition="right"
+                      onClick={downloadCSVTemplate}
+                    >
+                      تحميل القالب
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Instructions */}
+                <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                  <h4 className="font-medium text-blue-800 mb-3">تعليمات الاستيراد</h4>
+                  <ul className="text-sm text-blue-700 space-y-2">
+                    <li className="flex items-start space-x-2 space-x-reverse">
+                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span>الملف يجب أن يحتوي على عمود "الاسم" وعمود "رقم الهوية" كحد أدنى</span>
+                    </li>
+                    <li className="flex items-start space-x-2 space-x-reverse">
+                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span>رقم الهوية يجب أن يكون 9 أرقام بالضبط</span>
+                    </li>
+                    <li className="flex items-start space-x-2 space-x-reverse">
+                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span>رقم الهاتف يجب أن يبدأ بـ 05 ويتكون من 10 أرقام</span>
+                    </li>
+                    <li className="flex items-start space-x-2 space-x-reverse">
+                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span>إذا كان المستفيد موجود (نفس رقم الهوية)، سيتم تحديث بياناته</span>
+                    </li>
+                    <li className="flex items-start space-x-2 space-x-reverse">
+                      <AlertTriangle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                      <span>الحد الأقصى لحجم الملف: 10 ميجابايت</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Actions */}
+                <div className="flex space-x-3 space-x-reverse justify-end">
+                  <Button
+                    variant="secondary"
+                    onClick={() => setShowImportModal(false)}
+                    disabled={isImporting}
+                  >
+                    إلغاء
+                  </Button>
+                  <Button
+                    variant="primary"
+                    icon={isImporting ? undefined : Upload}
+                    iconPosition="right"
+                    onClick={handleImportBeneficiaries}
+                    disabled={!importFile || isImporting}
+                    loading={isImporting}
+                  >
+                    {isImporting ? 'جاري الاستيراد...' : 'بدء الاستيراد'}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              /* Import Results */
+              <div className="space-y-6">
+                {/* Results Summary */}
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl border border-green-200">
+                  <div className="flex items-center space-x-3 space-x-reverse mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-600" />
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">نتائج الاستيراد</h3>
+                      <p className="text-gray-600">تم معالجة الملف: {importFile?.name}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-4 gap-4">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">إجمالي الصفوف</p>
+                        <p className="text-2xl font-bold text-gray-900">{importResults.total}</p>
+                      </div>
+                    </div>
+                    <div className="bg-green-100 p-4 rounded-lg border border-green-200">
+                      <div className="text-center">
+                        <p className="text-sm text-green-600">مستفيدين جدد</p>
+                        <p className="text-2xl font-bold text-green-900">{importResults.imported}</p>
+                      </div>
+                    </div>
+                    <div className="bg-blue-100 p-4 rounded-lg border border-blue-200">
+                      <div className="text-center">
+                        <p className="text-sm text-blue-600">تم التحديث</p>
+                        <p className="text-2xl font-bold text-blue-900">{importResults.updated}</p>
+                      </div>
+                    </div>
+                    <div className="bg-red-100 p-4 rounded-lg border border-red-200">
+                      <div className="text-center">
+                        <p className="text-sm text-red-600">أخطاء</p>
+                        <p className="text-2xl font-bold text-red-900">{importResults.errors.length}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Imported Beneficiaries */}
+                {importResults.importedBeneficiaries.length > 0 && (
+                  <div className="bg-white border border-gray-200 rounded-xl p-4">
+                    <h4 className="font-medium text-gray-900 mb-3">المستفيدين المستوردين ({importResults.importedBeneficiaries.length})</h4>
+                    <div className="max-h-40 overflow-y-auto space-y-2">
+                      {importResults.importedBeneficiaries.map((beneficiary, index) => (
+                        <div key={beneficiary.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                          <div className="flex items-center space-x-3 space-x-reverse">
+                            <div className="bg-green-100 p-2 rounded-lg">
+                              <UserPlus className="w-4 h-4 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{beneficiary.name}</p>
+                              <p className="text-sm text-gray-600">{beneficiary.nationalId} - {beneficiary.phone}</p>
+                            </div>
+                          </div>
+                          <Badge variant="success" size="sm">
+                            {mockBeneficiaries.find(b => b.nationalId === beneficiary.nationalId && b.id !== beneficiary.id) ? 'محدث' : 'جديد'}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Errors */}
+                {importResults.errors.length > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                    <h4 className="font-medium text-red-800 mb-3">أخطاء الاستيراد ({importResults.errors.length})</h4>
+                    <div className="max-h-40 overflow-y-auto space-y-2">
+                      {importResults.errors.map((error, index) => (
+                        <div key={index} className="bg-white p-3 rounded-lg border border-red-200">
+                          <div className="flex items-start space-x-2 space-x-reverse">
+                            <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="font-medium text-red-800">الصف {error.row}:</p>
+                              <ul className="text-sm text-red-700 mt-1">
+                                {error.errors.map((err, errIndex) => (
+                                  <li key={errIndex}>• {err}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex space-x-3 space-x-reverse justify-end pt-4 border-t border-gray-200">
+                  <Button
+                    variant="secondary"
+                    icon={RefreshCw}
+                    iconPosition="right"
+                    onClick={clearImportResults}
+                  >
+                    استيراد ملف آخر
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={() => setShowImportModal(false)}
+                  >
+                    إغلاق ({importResults.imported + importResults.updated} مستفيد مضاف)
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </Modal>
+      )}
+
       {/* Instructions */}
       <Card className="bg-blue-50 border-blue-200">
         <div className="flex items-start space-x-3 space-x-reverse">
@@ -570,6 +997,10 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
               <li className="flex items-start space-x-2 space-x-reverse">
                 <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                 <span>يمكن تحديد المستفيدين من القائمة الحالية أو البحث عن مستفيدين إضافيين</span>
+              </li>
+              <li className="flex items-start space-x-2 space-x-reverse">
+                <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <span>يمكن استيراد مستفيدين جدد من ملف Excel أو CSV</span>
               </li>
               <li className="flex items-start space-x-2 space-x-reverse">
                 <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
