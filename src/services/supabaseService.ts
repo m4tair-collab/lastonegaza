@@ -1,6 +1,5 @@
 import { 
   mockBeneficiaries, 
-  mockOrganizations, 
   mockFamilies, 
   mockPackages, 
   mockTasks, 
@@ -13,7 +12,6 @@ import {
   mockPermissions,
   calculateStats,
   type Beneficiary,
-  type Organization,
   type Family,
   type Package as PackageType,
   type Task,
@@ -55,11 +53,7 @@ export const beneficiariesService = {
   },
 
   async getByOrganization(organizationId: string): Promise<Beneficiary[]> {
-    await simulateNetworkDelay();
-    return mockBeneficiaries.filter(b => b.organizationId === organizationId);
-  },
 
-  async getByFamily(familyId: string): Promise<Beneficiary[]> {
     await simulateNetworkDelay();
     return mockBeneficiaries.filter(b => b.familyId === familyId);
   },
@@ -127,22 +121,6 @@ export const beneficiariesService = {
   }
 };
 
-export const organizationsService = {
-  async getAll(): Promise<Organization[]> {
-    await simulateNetworkDelay();
-    return [...mockOrganizations];
-  },
-
-  async getActive(): Promise<Organization[]> {
-    await simulateNetworkDelay();
-    return mockOrganizations.filter(org => org.status === 'active');
-  },
-
-  async getById(id: string): Promise<Organization | null> {
-    await simulateNetworkDelay();
-    return mockOrganizations.find(org => org.id === id) || null;
-  }
-};
 
 export const familiesService = {
   async getAll(): Promise<Family[]> {
@@ -176,7 +154,6 @@ export const packagesService = {
       description: packageData.description,
       value: packageData.value,
       funder: packageData.funder,
-      organizationId: packageData.organizationId,
       familyId: packageData.familyId,
       beneficiaryId: packageData.beneficiaryId,
       status: 'pending',
@@ -197,17 +174,13 @@ export const packageTemplatesService = {
   },
 
   async getByOrganization(organizationId: string): Promise<PackageTemplate[]> {
-    await simulateNetworkDelay();
-    return mockPackageTemplates.filter(t => t.organization_id === organizationId);
-  },
 
-  async createWithItems(template: any, items: any[]): Promise<PackageTemplate> {
     await simulateNetworkDelay();
     const newTemplate: PackageTemplate = {
       id: `template-${Date.now()}`,
       name: template.name,
       type: template.type,
-      organization_id: template.organization_id,
+      family_id: template.family_id,
       description: template.description,
       contents: items,
       status: 'active',

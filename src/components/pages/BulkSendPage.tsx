@@ -3,17 +3,15 @@ import { Users, Upload, Send, CheckCircle, AlertTriangle, FileText, Download, Pa
 import { 
   type Beneficiary, 
   mockBeneficiaries, 
-  mockOrganizations, 
   mockPackageTemplates,
-  type Organization,
   type PackageTemplate
 } from '../../data/mockData';
 
 export default function BulkSendPage() {
-  const [selectedInstitution, setSelectedInstitution] = useState<string>('');
+  const [selectedFamily, setSelectedFamily] = useState<string>('');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [institutionSearch, setInstitutionSearch] = useState('');
+  const [familySearch, setFamilySearch] = useState('');
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -31,18 +29,18 @@ export default function BulkSendPage() {
   });
 
   // استخدام البيانات الوهمية مباشرة
-  const institutions = mockOrganizations;
+  const families = mockFamilies;
   const packageTemplates = mockPackageTemplates;
   const allBeneficiaries = mockBeneficiaries;
   const loading = false;
-  const organizationsError = null;
+  const familiesError = null;
   const packageTemplatesError = null;
   const beneficiariesError = null;
 
   const regions = ['شمال غزة', 'مدينة غزة', 'الوسط', 'خان يونس', 'رفح'];
 
-  const handleInstitutionSelect = (institutionId: string) => {
-    setSelectedInstitution(institutionId);
+  const handleFamilySelect = (familyId: string) => {
+    setSelectedFamily(familyId);
     setSelectedTemplate(''); // Reset template selection
   };
 
@@ -83,16 +81,16 @@ export default function BulkSendPage() {
     return areaMap[area] || area;
   };
 
-  const filteredInstitutions = institutions.filter(inst =>
-    inst.name.toLowerCase().includes(institutionSearch.toLowerCase())
+  const filteredFamilies = families.filter(family =>
+    family.name.toLowerCase().includes(familySearch.toLowerCase())
   );
 
   const availableTemplates = packageTemplates.filter(template => 
-    template.organization_id === selectedInstitution
+    template.family_id === selectedFamily
   );
 
   const selectedTemplateData = packageTemplates.find(t => t.id === selectedTemplate);
-  const selectedInstitutionData = institutions.find(i => i.id === selectedInstitution);
+  const selectedFamilyData = families.find(f => f.id === selectedFamily);
   const filteredBeneficiaries = getFilteredBeneficiaries();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,22 +111,22 @@ export default function BulkSendPage() {
   };
 
   const handleBulkSend = () => {
-    if (!selectedInstitution || !selectedTemplate || filteredBeneficiaries.length === 0) {
-      alert('يرجى اختيار المؤسسة والقالب والتأكد من وجود مستفيدين');
+    if (!selectedFamily || !selectedTemplate || filteredBeneficiaries.length === 0) {
+      alert('يرجى اختيار العائلة والقالب والتأكد من وجود مستفيدين');
       return;
     }
 
-    const institutionName = selectedInstitutionData?.name;
+    const familyName = selectedFamilyData?.name;
     const templateName = selectedTemplateData?.name;
     const count = filteredBeneficiaries.length;
     const totalCost = count * (selectedTemplateData?.estimatedCost || 0);
 
-    if (confirm(`تأكيد الإرسال الجماعي:\n\nالمؤسسة: ${institutionName}\nالقالب: ${templateName}\nعدد المستفيدين: ${count}\nالتكلفة المتوقعة: ${totalCost} ₪\n\nهل تريد المتابعة؟`)) {
+    if (confirm(`تأكيد الإرسال الجماعي:\n\nالعائلة: ${familyName}\nالقالب: ${templateName}\nعدد المستفيدين: ${count}\nالتكلفة المتوقعة: ${totalCost} ₪\n\nهل تريد المتابعة؟`)) {
       const sendId = `SEND-2024-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
       alert(`تم تأكيد الإرسال بنجاح!\n\nرقم الإرسالية: ${sendId}\nسيتم البدء في التحضير والتوزيع`);
       
       // Reset form
-      setSelectedInstitution('');
+      setSelectedFamily('');
       setSelectedTemplate('');
       setFilters({
         benefitStatus: '',
@@ -143,8 +141,8 @@ export default function BulkSendPage() {
   };
 
   const handlePreview = () => {
-    if (!selectedInstitution || !selectedTemplate) {
-      alert('يرجى اختيار المؤسسة والقالب أولاً');
+    if (!selectedFamily || !selectedTemplate) {
+      alert('يرجى اختيار العائلة والقالب أولاً');
       return;
     }
     setShowPreviewModal(true);
@@ -169,7 +167,7 @@ export default function BulkSendPage() {
         <div className="flex items-center space-x-2 space-x-reverse text-blue-600">
           <CheckCircle className="w-4 h-4" />
           <span className="text-sm font-medium">
-            البيانات الوهمية محملة - {institutions.length} مؤسسة، {packageTemplates.length} قالب، {allBeneficiaries.length} مستفيد
+            البيانات الوهمية محملة - {families.length} عائلة، {packageTemplates.length} قالب، {allBeneficiaries.length} مستفيد
           </span>
         </div>
       </div>
@@ -185,21 +183,21 @@ export default function BulkSendPage() {
         </div>
         <div className="flex items-center space-x-4 space-x-reverse">
           <div className={`flex items-center space-x-2 space-x-reverse ${selectedInstitution ? 'text-green-600' : 'text-blue-600'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedInstitution ? 'bg-green-100' : 'bg-blue-100'}`}>
-              {selectedInstitution ? <CheckCircle className="w-4 h-4" /> : <span className="text-sm font-bold">1</span>}
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedFamily ? 'bg-green-100' : 'bg-blue-100'}`}>
+              {selectedFamily ? <CheckCircle className="w-4 h-4" /> : <span className="text-sm font-bold">1</span>}
             </div>
-            <span className="text-sm font-medium">اختيار المؤسسة</span>
+            <span className="text-sm font-medium">اختيار العائلة</span>
           </div>
           <div className="flex-1 h-0.5 bg-gray-200"></div>
-          <div className={`flex items-center space-x-2 space-x-reverse ${selectedTemplate ? 'text-green-600' : selectedInstitution ? 'text-blue-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedTemplate ? 'bg-green-100' : selectedInstitution ? 'bg-blue-100' : 'bg-gray-100'}`}>
+          <div className={`flex items-center space-x-2 space-x-reverse ${selectedTemplate ? 'text-green-600' : selectedFamily ? 'text-blue-600' : 'text-gray-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedTemplate ? 'bg-green-100' : selectedFamily ? 'bg-blue-100' : 'bg-gray-100'}`}>
               {selectedTemplate ? <CheckCircle className="w-4 h-4" /> : <span className="text-sm font-bold">2</span>}
             </div>
             <span className="text-sm font-medium">اختيار القالب</span>
           </div>
           <div className="flex-1 h-0.5 bg-gray-200"></div>
-          <div className={`flex items-center space-x-2 space-x-reverse ${selectedTemplate && selectedInstitution ? 'text-blue-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedTemplate && selectedInstitution ? 'bg-blue-100' : 'bg-gray-100'}`}>
+          <div className={`flex items-center space-x-2 space-x-reverse ${selectedTemplate && selectedFamily ? 'text-blue-600' : 'text-gray-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedTemplate && selectedFamily ? 'bg-blue-100' : 'bg-gray-100'}`}>
               <span className="text-sm font-bold">3</span>
             </div>
             <span className="text-sm font-medium">اختيار المستفيدين</span>
@@ -210,8 +208,8 @@ export default function BulkSendPage() {
       {/* Institution Selection */}
       <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-bold text-gray-900">اختيار المؤسسة المانحة</h3>
-          {selectedInstitution && (
+          <h3 className="text-lg font-bold text-gray-900">اختيار العائلة المانحة</h3>
+          {selectedFamily && (
             <div className="flex items-center space-x-2 space-x-reverse text-green-600">
               <CheckCircle className="w-5 h-5" />
               <span className="text-sm font-medium">تم الاختيار</span>
@@ -219,72 +217,72 @@ export default function BulkSendPage() {
           )}
         </div>
 
-        {/* Institution Search */}
+        {/* Family Search */}
         <div className="relative mb-4">
           <Search className="w-5 h-5 absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="ابحث عن المؤسسة..."
-            value={institutionSearch}
-            onChange={(e) => setInstitutionSearch(e.target.value)}
+            placeholder="ابحث عن العائلة..."
+            value={familySearch}
+            onChange={(e) => setFamilySearch(e.target.value)}
             className="w-full pr-12 pl-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
-        {/* Popular Institutions */}
+        {/* Popular Families */}
         <div className="mb-6">
           <div className="flex items-center space-x-2 space-x-reverse mb-3">
             <Star className="w-4 h-4 text-yellow-500" />
-            <h4 className="font-medium text-gray-900">المؤسسات الأكثر استخداماً</h4>
+            <h4 className="font-medium text-gray-900">العائلات الأكثر استخداماً</h4>
           </div>
           <div className="flex flex-wrap gap-2">
-            {institutions.filter(inst => inst.isPopular).map(institution => (
+            {families.slice(0, 3).map(family => (
               <button
-                key={institution.id}
-                onClick={() => handleInstitutionSelect(institution.id)}
+                key={family.id}
+                onClick={() => handleFamilySelect(family.id)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  selectedInstitution === institution.id
+                  selectedFamily === family.id
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {institution.name}
+                {family.name}
               </button>
             ))}
           </div>
         </div>
 
-        {/* All Institutions */}
+        {/* All Families */}
         <div>
-          <h4 className="font-medium text-gray-900 mb-3">جميع المؤسسات</h4>
-          {institutions.length > 0 ? (
+          <h4 className="font-medium text-gray-900 mb-3">جميع العائلات</h4>
+          {families.length > 0 ? (
             <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-xl">
-              {filteredInstitutions.map(institution => (
+              {filteredFamilies.map(family => (
                 <div
-                  key={institution.id}
-                  onClick={() => handleInstitutionSelect(institution.id)}
+                  key={family.id}
+                  onClick={() => handleFamilySelect(family.id)}
                   className={`p-4 border-b border-gray-100 cursor-pointer transition-colors hover:bg-gray-50 ${
-                    selectedInstitution === institution.id ? 'bg-blue-50 border-blue-200' : ''
+                    selectedFamily === family.id ? 'bg-blue-50 border-blue-200' : ''
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3 space-x-reverse">
                       <div className="bg-blue-100 p-2 rounded-lg">
-                        <Building2 className="w-5 h-5 text-blue-600" />
+                        <Users className="w-5 h-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{institution.name}</p>
+                        <p className="font-medium text-gray-900">{family.name}</p>
                         <p className="text-sm text-gray-600">
-                          {institution.packagesAvailable || 0} طرد متاح • {institution.templatesCount || 0} قوالب
+                          {family.membersCount} فرد • {family.packagesDistributed} طرد
                         </p>
                       </div>
                     </div>
                     <div className={`w-4 h-4 rounded border-2 ${
-                      selectedInstitution === institution.id 
+                      selectedFamily === family.id 
                         ? 'bg-blue-600 border-blue-600' 
                         : 'border-gray-300'
                     }`}>
-                      {selectedInstitution === institution.id && (
+                      {selectedFamily === family.id && (
                         <CheckCircle className="w-4 h-4 text-white" />
                       )}
                     </div>
@@ -294,16 +292,16 @@ export default function BulkSendPage() {
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <Building2 className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-              <p>لا توجد مؤسسات متاحة</p>
-              <p className="text-sm">يرجى إضافة مؤسسات أولاً</p>
+              <Users className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>لا توجد عائلات متاحة</p>
+              <p className="text-sm">يرجى إضافة عائلات أولاً</p>
             </div>
           )}
         </div>
       </div>
 
       {/* Template Selection */}
-      {selectedInstitution && (
+      {selectedFamily && (
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-gray-900">اختيار قالب الطرد</h3>
@@ -350,8 +348,8 @@ export default function BulkSendPage() {
           ) : (
             <div className="text-center py-8 text-gray-500">
               <Package className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-              <p>لا توجد قوالب متاحة لهذه المؤسسة</p>
-              <p className="text-sm">يرجى إضافة قوالب طرود للمؤسسة المحددة</p>
+              <p>لا توجد قوالب متاحة لهذه العائلة</p>
+              <p className="text-sm">يرجى إضافة قوالب طرود للعائلة المحددة</p>
             </div>
           )}
         </div>
@@ -623,7 +621,7 @@ export default function BulkSendPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">المؤسسة المانحة:</span>
-                      <span className="font-medium">{selectedInstitutionData.name}</span>
+                      <span className="font-medium">{selectedFamilyData.name}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">قالب الطرد:</span>
