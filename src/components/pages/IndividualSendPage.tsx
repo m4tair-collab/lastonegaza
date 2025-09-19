@@ -30,7 +30,7 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
   // استخدام البيانات الوهمية مباشرة
   const allBeneficiaries = mockBeneficiaries;
   const families = mockFamilies;
-  const institutions = mockInstitutions;
+  const institutions = mockOrganizations;
   const packageTemplates = mockPackageTemplates;
   const loading = false;
   const familiesError = null;
