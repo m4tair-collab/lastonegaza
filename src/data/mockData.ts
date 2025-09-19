@@ -685,8 +685,7 @@ export const mockFamilies: Family[] = [
     packagesDistributed: 1,
     completionRate: 100,
     location: 'خان يونس - الفخاري',
-    createdAt: '2024-01-25',
-    supportingOrganizationId: org3Id // الإغاثة الإسلامية
+    createdAt: '2024-01-25'
   }
 ];
 

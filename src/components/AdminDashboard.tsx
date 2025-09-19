@@ -89,6 +89,7 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
       icon: Users,
       children: [
         { id: 'beneficiaries-list', name: 'قائمة المستفيدين', icon: Users },
+        { id: 'bulk-tasks', name: 'المهام الجماعية', icon: Send },
         { id: 'status-management', name: 'إدارة الحالات', icon: UserCheck },
         { id: 'delayed', name: 'المتأخرين', icon: Clock },
         { id: 'activity-log', name: 'سجل النشاط', icon: Activity }
@@ -101,7 +102,6 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
       children: [
         { id: 'packages-list', name: 'قوالب الطرود', icon: Package }, // Still refers to package templates
         { id: 'bulk-send', name: 'إرسال جماعي', icon: Users }, // Moved from beneficiaries
-        { id: 'bulk-tasks', name: 'المهام الجماعية', icon: Send }, // Moved from beneficiaries
         { id: 'individual-send', name: 'إرسال فردي', icon: UserPlus }, // Moved from beneficiaries
         { id: 'tracking', name: 'تتبع الإرسالات', icon: Truck }, // Still refers to tracking
         { id: 'distribution-reports', name: 'تقارير التوزيع', icon: BarChart3 } // Still refers to reports
