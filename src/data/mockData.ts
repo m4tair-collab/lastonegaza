@@ -1551,9 +1551,6 @@ export const getTasksByBatch = (batchId: string): Task[] => {
   return mockTasks.filter(t => t.batchId === batchId);
 };
 
-export const getBatchStatistics = (batchId: string) => {
-  const batchTasks = getTasksByBatch(batchId);
-  const total = batchTasks.length;
   const delivered = batchTasks.filter(task => task.status === 'delivered').length;
   const failed = batchTasks.filter(task => task.status === 'failed').length;
   const pending = batchTasks.filter(task => ['pending', 'assigned', 'in_progress'].includes(task.status)).length;
