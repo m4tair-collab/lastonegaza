@@ -406,6 +406,16 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       <Card>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-gray-900">إضافة مستفيدين إضافيين</h3>
+          <div className="flex space-x-2 space-x-reverse">
+            <Button
+              variant="secondary"
+              icon={Download}
+              iconPosition="right"
+              size="sm"
+              onClick={downloadCSVTemplate}
+            >
+              تحميل قالب CSV
+            </Button>
             <Button
               variant="primary"
               icon={Upload}
@@ -416,6 +426,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
               استيراد من ملف
             </Button>
           </div>
+        </div>
         
         <div className="mb-4">
           <Input
