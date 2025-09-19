@@ -1018,7 +1018,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
                         <div key={beneficiary.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
                           <div className="flex items-center space-x-3 space-x-reverse">
                             <div className="bg-green-100 p-2 rounded-lg">
-                              <UserPlus className="w-4 h-4 text-green-600" />
+                              <Users className="w-4 h-4 text-green-600" />
                             </div>
                             <div>
                               <p className="font-medium text-gray-900">{beneficiary.name}</p>
