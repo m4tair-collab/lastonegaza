@@ -299,7 +299,15 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
             <Button
               variant="secondary"
               icon={ArrowLeft}
-          <Button variant="primary" icon={Download} iconPosition="right">
+              iconPosition="right"
+              onClick={onNavigateBack}
+            >
+              العودة
+            </Button>
+          )}
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">إنشاء مهام جماعية</h1>
+            <p className="text-gray-600">إنشاء مهام توزيع لعدة مستفيدين في نفس الوقت</p>
           </div>
         </div>
         <div className="flex space-x-3 space-x-reverse">
@@ -310,6 +318,9 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
             onClick={() => setShowImportModal(true)}
           >
             استيراد مستفيدين
+          </Button>
+          <Button variant="primary" icon={Download} iconPosition="right">
+            تحميل قالب
           </Button>
         </div>
       </div>
@@ -398,6 +409,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       <Card>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-gray-900">إضافة مستفيدين إضافيين</h3>
+          <div className="flex space-x-2 space-x-reverse">
             <Button
               variant="primary"
               icon={Upload}
@@ -408,6 +420,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
               استيراد من ملف
             </Button>
           </div>
+        </div>
         
         <div className="mb-4">
           <Input
@@ -885,6 +898,25 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
               <Send className="w-12 h-12 text-blue-600 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-gray-900 mb-4">هل أنت متأكد من إنشاء هذه المهام؟</h3>
               <p className="text-gray-600">
+                سيتم إنشاء {selectedBeneficiaries.length} مهمة توزيع جديدة
+              </p>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg mb-6 text-right">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">عدد المستفيدين:</span>
+                  <span className="font-medium text-gray-900">{selectedBeneficiaries.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">المؤسسة:</span>
+                  <span className="font-medium text-gray-900">{selectedOrganizationData?.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">الطرد:</span>
+                  <span className="font-medium text-gray-900">
+                    {selectedTemplateData ? selectedTemplateData.name : packageCode}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">الأولوية:</span>
