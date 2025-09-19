@@ -276,7 +276,7 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
       'activity-log': 'سجل جميع الأنشطة والعمليات في النظام',
       'packages-list': 'إنشاء وإدارة قوالب الطرود وعمليات التوزيع',
       'tracking': 'تتبع حالة الطرود والإرسالات',
-      'distribution-reports': 'تقارير مفصلة عن عمليات التوزيع',
+      'distribution-reports': 'تقارير مفصلة عن عمليات التوزيع ومتابعة دفعات التوزيع',
       'organizations': 'إدارة المؤسسات الخيرية والإنسانية',
       'families': 'إدارة العائلات والمبادرين الفرديين',
       'couriers': 'إدارة المندوبين ومتابعة أدائهم',
