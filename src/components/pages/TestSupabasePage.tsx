@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Database, CheckCircle, AlertTriangle, RefreshCw, Users, Package, Building2, Heart, Shield, Activity, Eye, Edit, Phone } from 'lucide-react';
 import { statisticsService } from '../../services/supabaseService';
-import { mockBeneficiaries, mockFamilies, mockPackages, mockTasks, mockAlerts, mockRoles, mockSystemUsers, calculateStats } from '../../data/mockData';
+import { mockBeneficiaries, mockOrganizations, mockFamilies, mockPackages, mockTasks, mockAlerts, mockRoles, mockSystemUsers, calculateStats } from '../../data/mockData';
 import SupabaseConnectionStatus from '../SupabaseConnectionStatus';
 
 export default function TestSupabasePage() {
@@ -11,6 +11,7 @@ export default function TestSupabasePage() {
 
   // استخدام البيانات الوهمية مباشرة
   const beneficiaries = mockBeneficiaries;
+  const organizations = mockOrganizations;
   const families = mockFamilies;
   const packages = mockPackages;
   const tasks = mockTasks;
@@ -20,6 +21,7 @@ export default function TestSupabasePage() {
 
   const testQueries = [
     { name: 'المستفيدين', data: beneficiaries, loading: false, error: null, icon: Users, color: 'blue' },
+    { name: 'المؤسسات', data: organizations, loading: false, error: null, icon: Building2, color: 'green' },
     { name: 'العائلات', data: families, loading: false, error: null, icon: Heart, color: 'purple' },
     { name: 'الطرود', data: packages, loading: false, error: null, icon: Package, color: 'orange' },
     { name: 'المهام', data: tasks, loading: false, error: null, icon: Activity, color: 'indigo' },
@@ -203,6 +205,35 @@ export default function TestSupabasePage() {
             </div>
           </div>
           
+          <div className="bg-green-50 p-4 rounded-xl border border-green-200">
+            <h4 className="font-medium text-green-800 mb-3">أول مؤسسة في البيانات الوهمية:</h4>
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-green-700">اسم المؤسسة:</span>
+                <span className="font-medium text-green-900 mr-2">{organizations[0]?.name}</span>
+              </div>
+              <div>
+                <span className="text-green-700">النوع:</span>
+                <span className="font-medium text-green-900 mr-2">{organizations[0]?.type}</span>
+              </div>
+              <div>
+                <span className="text-green-700">الموقع:</span>
+                <span className="font-medium text-green-900 mr-2">{organizations[0]?.location}</span>
+              </div>
+              <div>
+                <span className="text-green-700">الحالة:</span>
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mr-2 ${
+                  organizations[0]?.status === 'active' ? 'bg-green-100 text-green-800' :
+                  organizations[0]?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {organizations[0]?.status === 'active' ? 'نشط' :
+                   organizations[0]?.status === 'pending' ? 'معلق' : 'موقوف'}
+                </span>
+              </div>
+            </div>
+          </div>
+          
           <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
             <h4 className="font-medium text-purple-800 mb-3">أول دور في النظام:</h4>
             <div className="grid md:grid-cols-2 gap-4 text-sm">
@@ -255,17 +286,17 @@ export default function TestSupabasePage() {
             </div>
           </div>
           
-          {/* Families Sample */}
+          {/* Organizations Sample */}
           <div className="bg-green-50 p-4 rounded-xl border border-green-200">
-            <h4 className="font-medium text-green-800 mb-3">عينة من العائلات ({families.length} إجمالي):</h4>
+            <h4 className="font-medium text-green-800 mb-3">عينة من المؤسسات ({organizations.length} إجمالي):</h4>
             <div className="space-y-2 max-h-40 overflow-y-auto">
-              {families.slice(0, 5).map((family, index) => (
-                <div key={family.id} className="bg-white p-3 rounded-lg flex justify-between items-center">
+              {organizations.slice(0, 5).map((org, index) => (
+                <div key={org.id} className="bg-white p-3 rounded-lg flex justify-between items-center">
                   <div>
-                    <p className="font-medium text-gray-900">{family.name}</p>
-                    <p className="text-sm text-gray-600">{family.headOfFamily}</p>
+                    <p className="font-medium text-gray-900">{org.name}</p>
+                    <p className="text-sm text-gray-600">{org.type}</p>
                   </div>
-                  <span className="text-sm text-gray-600">{family.membersCount} فرد</span>
+                  <span className="text-sm text-gray-600">{org.beneficiariesCount} مستفيد</span>
                 </div>
               ))}
             </div>
