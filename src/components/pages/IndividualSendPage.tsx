@@ -3,10 +3,10 @@ import { User, Search, Send, Package, MapPin, Phone, CheckCircle, AlertTriangle,
 import { 
   type Beneficiary, 
   mockBeneficiaries, 
-  mockOrganizations, 
   mockPackageTemplates,
-  type Organization,
-  type PackageTemplate
+  type PackageTemplate,
+  mockFamilies,
+  mockInstitutions
 } from '../../data/mockData';
 import { Modal } from '../ui';
 
@@ -17,7 +17,7 @@ interface IndividualSendPageProps {
 
 export default function IndividualSendPage({ beneficiaryIdToPreselect, onBeneficiaryPreselected }: IndividualSendPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedInstitution, setSelectedInstitution] = useState<string>('');
+  const [selectedFamily, setSelectedFamily] = useState<string>('');
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [notes, setNotes] = useState('');
@@ -29,10 +29,11 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
 
   // استخدام البيانات الوهمية مباشرة
   const allBeneficiaries = mockBeneficiaries;
-  const institutions = mockOrganizations;
+  const families = mockFamilies;
+  const institutions = mockInstitutions;
   const packageTemplates = mockPackageTemplates;
   const loading = false;
-  const organizationsError = null;
+  const familiesError = null;
   const packageTemplatesError = null;
   const beneficiariesError = null;
 
@@ -102,7 +103,7 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
 
   const resetForm = () => {
     setSearchTerm('');
-    setSelectedInstitution('');
+    setSelectedFamily('');
     setSelectedBeneficiary(null);
     setSelectedTemplate('');
     setNotes('');
@@ -161,19 +162,10 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
   };
 
   const getTemplatesByInstitution = () => {
-    const grouped: { [key: string]: PackageTemplate[] } = {};
-    packageTemplates.forEach(template => {
-      const institutionName = institutions.find(inst => inst.id === template.organization_id)?.name || 'غير محدد';
-      if (!grouped[institutionName]) {
-        grouped[institutionName] = [];
-      }
-      grouped[institutionName].push(template);
-    });
-    return grouped;
+    return packageTemplates.filter(template => template.family_id === selectedFamily);
   };
 
-  const templatesByInstitution = getTemplatesByInstitution();
-  const institutionNames = Object.keys(templatesByInstitution);
+  const availableTemplates = getTemplatesByInstitution();
 
   return (
     <div className="space-y-6">
@@ -193,7 +185,7 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
         <div className="flex items-center space-x-2 space-x-reverse text-blue-600">
           <CheckCircle className="w-4 h-4" />
           <span className="text-sm font-medium">
-            البيانات الوهمية محملة - {institutions.length} مؤسسة، {packageTemplates.length} قالب، {allBeneficiaries.length} مستفيد
+            البيانات الوهمية محملة - {families.length} عائلة، {packageTemplates.length} قالب، {allBeneficiaries.length} مستفيد
           </span>
         </div>
       </div>
@@ -370,32 +362,29 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
 
           {/* Institution Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">اختيار المؤسسة المانحة</label>
+            <label className="block text-sm font-medium text-gray-700 mb-3">اختيار العائلة المانحة</label>
             <select
-              value={selectedInstitution}
+              value={selectedFamily}
               onChange={(e) => {
-                setSelectedInstitution(e.target.value);
+                setSelectedFamily(e.target.value);
                 setSelectedTemplate('');
               }}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">اختر المؤسسة المانحة...</option>
-              {institutionNames.map(institutionName => {
-                const inst = institutions.find(i => i.name === institutionName);
-                return inst ? (
-                  <option key={inst.id} value={inst.id}>{inst.name}</option>
-                ) : null;
-              })}
+              <option value="">اختر العائلة المانحة...</option>
+              {families.map(family => (
+                <option key={family.id} value={family.id}>{family.name}</option>
+              ))}
             </select>
           </div>
 
-          {/* Templates for Selected Institution */}
-          {selectedInstitution && (
+          {/* Templates for Selected Family */}
+          {selectedFamily && (
             <div>
-              <h4 className="font-medium text-gray-900 mb-4">قوالب الطرود المتاحة من {institutions.find(inst => inst.id === selectedInstitution)?.name || 'غير محدد'}</h4>
-              {templatesByInstitution[institutions.find(inst => inst.id === selectedInstitution)?.name || 'غير محدد']?.length > 0 ? (
+              <h4 className="font-medium text-gray-900 mb-4">قوالب الطرود المتاحة من {families.find(f => f.id === selectedFamily)?.name || 'غير محدد'}</h4>
+              {availableTemplates.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {templatesByInstitution[institutions.find(inst => inst.id === selectedInstitution)?.name || 'غير محدد']?.map((template) => (
+                  {availableTemplates.map((template) => (
                     <div
                       key={template.id}
                       onClick={() => handleTemplateSelect(template.id)}
@@ -435,16 +424,16 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <Package className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                  <p>لا توجد قوالب متاحة لهذه المؤسسة</p>
+                  <p>لا توجد قوالب متاحة لهذه العائلة</p>
                 </div>
               )}
             </div>
           )}
 
-          {!selectedInstitution && (
+          {!selectedFamily && (
             <div className="text-center py-12 text-gray-500">
               <Package className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-lg">اختر المؤسسة المانحة أولاً</p>
+              <p className="text-lg">اختر العائلة المانحة أولاً</p>
               <p className="text-sm">لعرض قوالب الطرود المتاحة</p>
             </div>
           )}
