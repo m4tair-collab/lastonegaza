@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { Package, Users, Send, CheckCircle, AlertTriangle, Clock, Building2, Search, Filter, Plus, Eye, Edit, X, ArrowLeft, Calendar, MapPin, Phone, FileText, Star, TrendingUp, Upload, Download, RefreshCw, UserPlus, Trash2 } from 'lucide-react';
-import { mockBeneficiaries, mockPackages, calculateStats, mockOrganizations, mockFamilies, mockPackageTemplates, addOrUpdateBeneficiaryFromImport, validateImportedBeneficiary, generateBeneficiariesCSVTemplate } from '../../data/mockData';
+import { Package, Users, Send, CheckCircle, AlertTriangle, Clock, Building2, Search, Filter, Plus, Eye, Edit, X, ArrowLeft, Calendar, MapPin, Phone, FileText, Star, TrendingUp, Upload, Download, RefreshCw, UserPlus, Trash2, Heart } from 'lucide-react';
+import { 
   mockBeneficiaries, 
+  mockPackages, 
+  calculateStats, 
   mockOrganizations, 
-  mockPackageTemplates,
-  addOrUpdateBeneficiaryFromImport,
+  mockFamilies, 
+  mockPackageTemplates, 
+  addOrUpdateBeneficiaryFromImport, 
+  validateImportedBeneficiary, 
   generateBeneficiariesCSVTemplate,
-  validateImportedBeneficiary,
   type Beneficiary,
   type Organization,
   type PackageTemplate
@@ -26,6 +29,8 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [packageCode, setPackageCode] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [organizationSearchTerm, setOrganizationSearchTerm] = useState('');
+  const [familySearchTerm, setFamilySearchTerm] = useState('');
   const [priority, setPriority] = useState<'normal' | 'high' | 'urgent'>('normal');
   const [scheduledDate, setScheduledDate] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
@@ -54,6 +59,17 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
     ben.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ben.nationalId.includes(searchTerm) ||
     ben.phone.includes(searchTerm)
+  );
+
+  // Filter organizations for search
+  const filteredOrganizations = organizations.filter(org =>
+    org.name.toLowerCase().includes(organizationSearchTerm.toLowerCase()) ||
+    org.type.toLowerCase().includes(organizationSearchTerm.toLowerCase())
+  );
+
+  // Filter families for search
+  const filteredFamilies = mockFamilies.filter(family =>
+    family.name.toLowerCase().includes(familySearchTerm.toLowerCase())
   );
 
   const selectedBeneficiariesData = allBeneficiaries.filter(b => selectedBeneficiaries.includes(b.id));
@@ -217,7 +233,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
     link.href = URL.createObjectURL(blob);
     link.download = 'قالب_المستفيدين.csv';
     link.click();
-    URL.revokeObjectURL(link);
+    URL.revokeObjectURL(link.href);
     
     setNotification({ message: 'تم تحميل قالب CSV بنجاح', type: 'success' });
     setTimeout(() => setNotification(null), 3000);
