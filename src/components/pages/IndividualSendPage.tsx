@@ -4,7 +4,9 @@ import {
   type Beneficiary, 
   mockBeneficiaries, 
   mockPackageTemplates,
-  type PackageTemplate
+  type PackageTemplate,
+  mockFamilies,
+  mockInstitutions
 } from '../../data/mockData';
 import { Modal } from '../ui';
 
@@ -28,6 +30,7 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
   // استخدام البيانات الوهمية مباشرة
   const allBeneficiaries = mockBeneficiaries;
   const families = mockFamilies;
+  const institutions = mockInstitutions;
   const packageTemplates = mockPackageTemplates;
   const loading = false;
   const familiesError = null;
@@ -100,7 +103,7 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
 
   const resetForm = () => {
     setSearchTerm('');
-    setSelectedInstitution('');
+    setSelectedFamily('');
     setSelectedBeneficiary(null);
     setSelectedTemplate('');
     setNotes('');
@@ -115,7 +118,7 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
     return {
       beneficiaryName: selectedBeneficiary?.name,
       templateName: templateInfo?.name,
-      familyName: families.find(f => f.id === templateInfo?.family_id)?.name || 'غير محدد',
+      institutionName: institutions.find(inst => inst.id === templateInfo?.organization_id)?.name || 'غير محدد',
       reasonName: reasonInfo?.name,
       priorityText: priority === 'high' ? 'عالية' : priority === 'low' ? 'منخفضة' : 'عادية',
       estimatedCost: templateInfo?.estimatedCost,
@@ -371,7 +374,7 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
               <option value="">اختر العائلة المانحة...</option>
               {families.map(family => (
                 <option key={family.id} value={family.id}>{family.name}</option>
-              })}
+              ))}
             </select>
           </div>
 
@@ -452,7 +455,7 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
                   </div>
                   <div className="flex justify-between">
                     <span className="text-green-700">المؤسسة:</span>
-                    <span className="font-medium text-green-900">{families.find(f => f.id === selectedTemplateData.family_id)?.name || 'غير محدد'}</span>
+                    <span className="font-medium text-green-900">{institutions.find(inst => inst.id === selectedTemplateData.organization_id)?.name || 'غير محدد'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-green-700">عدد الأصناف:</span>
@@ -690,7 +693,7 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
               </div>
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-600">المؤسسة:</span>
-                <span className="font-medium text-gray-900">{getConfirmMessageDetails().familyName}</span>
+                <span className="font-medium text-gray-900">{getConfirmMessageDetails().institutionName}</span>
               </div>
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-600">السبب:</span>
