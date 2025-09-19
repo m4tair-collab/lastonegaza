@@ -151,7 +151,12 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       // محاكاة تحليل البيانات من CSV
       const mockCSVData = [
         { name: 'أحمد محمد المستورد', nationalId: '900111111', phone: '0597111111', alternativePhone: '0598111111' },
-        { name: 'فاطمة سالم المستوردة', nationalId: '900222222', phone: '0597222222', alternativePhone: '' },
+        { name
+        }
+      ]
+    }
+  }
+}: 'فاطمة سالم المستوردة', nationalId: '900222222', phone: '0597222222', alternativePhone: '' },
         { name: 'محمد علي المستورد', nationalId: '900333333', phone: '0597333333', alternativePhone: '0598333333' },
         { name: 'سارة أحمد المستوردة', nationalId: '900444444', phone: '0597444444', alternativePhone: '' },
         { name: 'خالد يوسف المستورد', nationalId: '900555555', phone: '0597555555', alternativePhone: '0598555555' },
@@ -299,15 +304,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
             <Button
               variant="secondary"
               icon={ArrowLeft}
-              iconPosition="right"
-              onClick={onNavigateBack}
-            >
-              العودة للقائمة
-            </Button>
-          )}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">إنشاء مهام جماعية</h2>
-            <p className="text-gray-600 mt-1">إنشاء مهام توزيع لمجموعة من المستفيدين</p>
+          <Button variant="primary" icon={Download} iconPosition="right">
           </div>
         </div>
         <div className="flex space-x-3 space-x-reverse">
@@ -406,16 +403,6 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       <Card>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-gray-900">إضافة مستفيدين إضافيين</h3>
-          <div className="flex space-x-2 space-x-reverse">
-            <Button
-              variant="secondary"
-              icon={Download}
-              iconPosition="right"
-              size="sm"
-              onClick={downloadCSVTemplate}
-            >
-              تحميل قالب CSV
-            </Button>
             <Button
               variant="primary"
               icon={Upload}
@@ -426,7 +413,6 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
               استيراد من ملف
             </Button>
           </div>
-        </div>
         
         <div className="mb-4">
           <Input
