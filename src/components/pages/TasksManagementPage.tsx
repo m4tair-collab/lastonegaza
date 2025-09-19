@@ -5,10 +5,13 @@ import {
   mockBeneficiaries, 
   mockPackages, 
   mockCouriers,
+  mockDistributionBatches,
+  getBatchStatistics,
   type Task, 
   type Beneficiary, 
   type Package as PackageType, 
-  type Courier 
+  type Courier,
+  type DistributionBatch
 } from '../../data/mockData';
 import { useErrorLogger } from '../../utils/errorLogger';
 import { Button, Card, Input, Badge, Modal } from '../ui';
@@ -18,6 +21,7 @@ export default function TasksManagementPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [courierFilter, setCourierFilter] = useState('all');
   const [regionFilter, setRegionFilter] = useState('all');
+  const [batchFilter, setBatchFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'assign' | 'update' | 'view' | 'reschedule'>('assign');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -29,6 +33,7 @@ export default function TasksManagementPage() {
   const beneficiaries = mockBeneficiaries;
   const packages = mockPackages;
   const couriers = mockCouriers;
+  const distributionBatches = mockDistributionBatches;
 
   // Form states for modals
   const [assignForm, setAssignForm] = useState({
@@ -88,6 +93,16 @@ export default function TasksManagementPage() {
       }
     }
 
+    // فلترة دفعة التوزيع
+    if (batchFilter !== 'all') {
+      if (batchFilter === 'unassigned' && task.batchId) {
+        return false;
+      }
+      if (batchFilter !== 'unassigned' && task.batchId !== batchFilter) {
+        return false;
+      }
+    }
+
     return true;
   });
 
@@ -99,7 +114,9 @@ export default function TasksManagementPage() {
     inProgress: tasks.filter(t => t.status === 'in_progress').length,
     delivered: tasks.filter(t => t.status === 'delivered').length,
     failed: tasks.filter(t => t.status === 'failed').length,
-    unassigned: tasks.filter(t => !t.courierId).length
+    unassigned: tasks.filter(t => !t.courierId).length,
+    withBatch: tasks.filter(t => t.batchId).length,
+    withoutBatch: tasks.filter(t => !t.batchId).length
   };
 
   const handleAssignCourier = (task: Task) => {
@@ -374,7 +391,7 @@ export default function TasksManagementPage() {
 
       {/* Search and Filters */}
       <Card>
-        <div className="grid md:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-5 gap-4">
           <Input
             type="text"
             icon={Search}
@@ -426,6 +443,21 @@ export default function TasksManagementPage() {
               <option value="all">جميع المناطق</option>
               {regions.map(region => (
                 <option key={region} value={region}>{region}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">دفعة التوزيع</label>
+            <select
+              value={batchFilter}
+              onChange={(e) => setBatchFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">جميع الدفعات</option>
+              <option value="unassigned">غير مرتبطة بدفعة</option>
+              {distributionBatches.map(batch => (
+                <option key={batch.id} value={batch.id}>{batch.name}</option>
               ))}
             </select>
           </div>
@@ -493,7 +525,74 @@ export default function TasksManagementPage() {
             <p className="text-2xl font-bold text-purple-900">{statistics.unassigned}</p>
           </div>
         </Card>
+
+        <Card className="bg-indigo-50">
+          <div className="text-center">
+            <div className="bg-indigo-100 p-3 rounded-xl mb-2">
+              <Package className="w-6 h-6 text-indigo-600 mx-auto" />
+            </div>
+            <p className="text-sm text-indigo-600">مرتبطة بدفعة</p>
+            <p className="text-2xl font-bold text-indigo-900">{statistics.withBatch}</p>
+          </div>
+        </Card>
+
+        <Card className="bg-gray-50">
+          <div className="text-center">
+            <div className="bg-gray-100 p-3 rounded-xl mb-2">
+              <Activity className="w-6 h-6 text-gray-600 mx-auto" />
+            </div>
+            <p className="text-sm text-gray-600">غير مرتبطة</p>
+            <p className="text-2xl font-bold text-gray-900">{statistics.withoutBatch}</p>
+          </div>
+        </Card>
       </div>
+
+      {/* Distribution Batches Overview */}
+      {batchFilter !== 'all' && batchFilter !== 'unassigned' && (
+        <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+          <div className="flex items-center space-x-4 space-x-reverse">
+            <div className="bg-blue-100 p-3 rounded-xl">
+              <Package className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              {(() => {
+                const selectedBatch = distributionBatches.find(b => b.id === batchFilter);
+                const batchStats = selectedBatch ? getBatchStatistics(selectedBatch.id) : null;
+                
+                return selectedBatch && batchStats ? (
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">{selectedBatch.name}</h3>
+                    <p className="text-gray-600 mb-3">{selectedBatch.description}</p>
+                    <div className="grid md:grid-cols-4 gap-4 text-sm">
+                      <div className="bg-white p-3 rounded-lg border border-blue-200">
+                        <span className="text-blue-600 font-medium">إجمالي المهام:</span>
+                        <p className="text-xl font-bold text-blue-900">{batchStats.totalTasks}</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-green-200">
+                        <span className="text-green-600 font-medium">تم التسليم:</span>
+                        <p className="text-xl font-bold text-green-900">{batchStats.delivered}</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-red-200">
+                        <span className="text-red-600 font-medium">فشل:</span>
+                        <p className="text-xl font-bold text-red-900">{batchStats.failed}</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-purple-200">
+                        <span className="text-purple-600 font-medium">نسبة النجاح:</span>
+                        <p className="text-xl font-bold text-purple-900">{batchStats.successRate}%</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">دفعة التوزيع</h3>
+                    <p className="text-gray-600">معلومات الدفعة غير متاحة</p>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Tasks Table */}
       <Card padding="none" className="overflow-hidden">
@@ -513,6 +612,9 @@ export default function TasksManagementPage() {
               <tr>
                 <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   المهمة
+                </th>
+                <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  دفعة التوزيع
                 </th>
                 <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   المستفيد
@@ -537,6 +639,7 @@ export default function TasksManagementPage() {
                   const beneficiary = beneficiaries.find(b => b.id === task.beneficiaryId);
                   const packageInfo = packages.find(p => p.id === task.packageId);
                   const courier = task.courierId ? couriers.find(c => c.id === task.courierId) : null;
+                  const batch = task.batchId ? distributionBatches.find(b => b.id === task.batchId) : null;
 
                   return (
                     <tr key={task.id} className="hover:bg-gray-50 transition-colors">
@@ -552,6 +655,20 @@ export default function TasksManagementPage() {
                             <div className="text-sm text-gray-500">#{task.id}</div>
                           </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {batch ? (
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{batch.name}</div>
+                            <div className="text-xs text-gray-500">
+                              {packages.find(p => p.organizationId === batch.organizationId)?.organizationName || 'مؤسسة غير محددة'}
+                            </div>
+                          </div>
+                        ) : (
+                          <Badge variant="warning" size="sm">
+                            غير مرتبطة
+                          </Badge>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
@@ -635,16 +752,16 @@ export default function TasksManagementPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
+                  <td colSpan={7} className="px-6 py-12 text-center">
                     <div className="text-gray-500">
                       <Activity className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                       <p className="text-lg font-medium">
-                        {searchTerm || statusFilter !== 'all' || courierFilter !== 'all' || regionFilter !== 'all' 
+                        {searchTerm || statusFilter !== 'all' || courierFilter !== 'all' || regionFilter !== 'all' || batchFilter !== 'all'
                           ? 'لا توجد مهام مطابقة للفلاتر' 
                           : 'لا توجد مهام'}
                       </p>
                       <p className="text-sm mt-2">
-                        {searchTerm || statusFilter !== 'all' || courierFilter !== 'all' || regionFilter !== 'all'
+                        {searchTerm || statusFilter !== 'all' || courierFilter !== 'all' || regionFilter !== 'all' || batchFilter !== 'all'
                           ? 'جرب تعديل الفلاتر أو مصطلح البحث'
                           : 'لم يتم إنشاء أي مهام بعد'}
                       </p>
@@ -654,6 +771,59 @@ export default function TasksManagementPage() {
               )}
             </tbody>
           </table>
+        </div>
+      </Card>
+
+      {/* Distribution Batches Summary */}
+      <Card>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">ملخص دفعات التوزيع النشطة</h3>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {distributionBatches.slice(0, 6).map((batch) => {
+            const batchStats = getBatchStatistics(batch.id);
+            const organization = packages.find(p => p.organizationId === batch.organizationId);
+            
+            return (
+              <div key={batch.id} className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-gray-900 text-sm">{batch.name}</h4>
+                  <Badge 
+                    variant={batchStats.successRate > 80 ? 'success' : batchStats.successRate > 60 ? 'warning' : 'error'} 
+                    size="sm"
+                  >
+                    {batchStats.successRate}%
+                  </Badge>
+                </div>
+                
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">المؤسسة:</span>
+                    <span className="font-medium text-gray-900">
+                      {organization?.organizationName || 'غير محددة'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">إجمالي المهام:</span>
+                    <span className="font-medium text-gray-900">{batchStats.totalTasks}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">تم التسليم:</span>
+                    <span className="font-medium text-green-600">{batchStats.delivered}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">فشل:</span>
+                    <span className="font-medium text-red-600">{batchStats.failed}</span>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => setBatchFilter(batch.id)}
+                  className="w-full mt-3 bg-blue-600 text-white py-2 px-3 rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
+                >
+                  عرض مهام هذه الدفعة
+                </button>
+              </div>
+            );
+          })}
         </div>
       </Card>
 
@@ -716,6 +886,13 @@ export default function TasksManagementPage() {
                 <span className="text-2xl font-bold text-orange-900">{statistics.pending + statistics.assigned}</span>
               </div>
             </div>
+            
+            <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
+              <div className="flex items-center justify-between">
+                <span className="text-purple-700">دفعات التوزيع النشطة</span>
+                <span className="text-2xl font-bold text-purple-900">{distributionBatches.length}</span>
+              </div>
+            </div>
           </div>
         </Card>
       </div>
@@ -751,6 +928,15 @@ export default function TasksManagementPage() {
                   </span>
                 </div>
                 <div>
+                  <span className="text-gray-600">دفعة التوزيع:</span>
+                  <span className="font-medium text-gray-900 mr-2">
+                    {selectedTask.batchId ? 
+                      distributionBatches.find(b => b.id === selectedTask.batchId)?.name || 'غير محدد' :
+                      'غير مرتبطة بدفعة'
+                    }
+                  </span>
+                </div>
+                <div>
                   <span className="text-gray-600">الحالة الحالية:</span>
                   <Badge 
                     variant={
@@ -765,7 +951,7 @@ export default function TasksManagementPage() {
                     {getStatusText(selectedTask.status)}
                   </Badge>
                 </div>
-                <div>
+                <div className="md:col-span-2">
                   <span className="text-gray-600">تاريخ الإنشاء:</span>
                   <span className="font-medium text-gray-900 mr-2">
                     {new Date(selectedTask.createdAt).toLocaleDateString('ar-SA')}
