@@ -95,6 +95,7 @@ export interface PackageTemplate {
   name: string;
   type: 'food' | 'medical' | 'clothing' | 'hygiene' | 'emergency';
   organization_id: string;
+  family_id?: string; // إضافة دعم للعائلات
   description: string;
   contents: PackageItem[];
   status: 'active' | 'draft' | 'inactive';
@@ -529,6 +530,83 @@ export const mockPackageTemplates: PackageTemplate[] = [
     usageCount: 247,
     totalWeight: 14.6,
     estimatedCost: 50
+  },
+  // قوالب طرود داخلية من المنصة
+  {
+    id: uuidv4(),
+    name: 'طرد غذائي أساسي - داخلي',
+    type: 'food',
+    organization_id: uuidv4(), // معرف المؤسسة الداخلية
+    description: 'طرد غذائي أساسي من مخزون المنصة',
+    contents: [
+      { id: uuidv4(), name: 'أرز أبيض', quantity: 3, unit: 'كيلو', weight: 3 },
+      { id: uuidv4(), name: 'زيت طبخ', quantity: 1, unit: 'لتر', weight: 1 },
+      { id: uuidv4(), name: 'سكر', quantity: 1, unit: 'كيلو', weight: 1 },
+      { id: uuidv4(), name: 'شاي', quantity: 1, unit: 'علبة', weight: 0.5 }
+    ],
+    status: 'active',
+    createdAt: '2024-01-01',
+    usageCount: 89,
+    totalWeight: 5.5,
+    estimatedCost: 25
+  },
+  {
+    id: uuidv4(),
+    name: 'طرد طوارئ سريع - داخلي',
+    type: 'emergency',
+    organization_id: uuidv4(), // معرف المؤسسة الداخلية
+    description: 'طرد طوارئ سريع للحالات العاجلة',
+    contents: [
+      { id: uuidv4(), name: 'ماء شرب', quantity: 6, unit: 'زجاجة', weight: 9 },
+      { id: uuidv4(), name: 'خبز', quantity: 5, unit: 'رغيف', weight: 1 },
+      { id: uuidv4(), name: 'تونة', quantity: 3, unit: 'علبة', weight: 0.6 },
+      { id: uuidv4(), name: 'بسكويت', quantity: 2, unit: 'علبة', weight: 0.4 }
+    ],
+    status: 'active',
+    createdAt: '2024-01-01',
+    usageCount: 156,
+    totalWeight: 11,
+    estimatedCost: 15
+  },
+  // قوالب طرود العائلات
+  {
+    id: uuidv4(),
+    name: 'طرد عائلة أبو عامر - دعم اللجنة المصرية',
+    type: 'food',
+    organization_id: '', // فارغ لأنه تابع لعائلة
+    family_id: family1Id, // ربط بعائلة أبو عامر
+    description: 'طرد غذائي مدعوم من اللجنة المصرية للإغاثة',
+    contents: [
+      { id: uuidv4(), name: 'أرز مصري', quantity: 10, unit: 'كيلو', weight: 10 },
+      { id: uuidv4(), name: 'زيت ذرة', quantity: 2, unit: 'لتر', weight: 2 },
+      { id: uuidv4(), name: 'سكر أبيض', quantity: 3, unit: 'كيلو', weight: 3 },
+      { id: uuidv4(), name: 'شاي أحمر', quantity: 2, unit: 'علبة', weight: 1 },
+      { id: uuidv4(), name: 'معكرونة', quantity: 3, unit: 'كيلو', weight: 3 }
+    ],
+    status: 'active',
+    createdAt: '2024-02-01',
+    usageCount: 12,
+    totalWeight: 19,
+    estimatedCost: 80
+  },
+  {
+    id: uuidv4(),
+    name: 'طرد عائلة النجار - دعم الهلال الأحمر المصري',
+    type: 'medical',
+    organization_id: '', // فارغ لأنه تابع لعائلة
+    family_id: family2Id, // ربط بعائلة النجار
+    description: 'طرد طبي مدعوم من الهلال الأحمر المصري',
+    contents: [
+      { id: uuidv4(), name: 'أدوية ضغط', quantity: 2, unit: 'علبة', weight: 0.2 },
+      { id: uuidv4(), name: 'مسكنات', quantity: 3, unit: 'علبة', weight: 0.3 },
+      { id: uuidv4(), name: 'ضمادات', quantity: 10, unit: 'قطعة', weight: 0.5 },
+      { id: uuidv4(), name: 'مطهر', quantity: 2, unit: 'زجاجة', weight: 0.4 }
+    ],
+    status: 'active',
+    createdAt: '2024-02-05',
+    usageCount: 5,
+    totalWeight: 1.4,
+    estimatedCost: 45
   },
   {
     id: uuidv4(),

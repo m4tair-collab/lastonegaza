@@ -24,12 +24,14 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
   const [selectedBeneficiaries, setSelectedBeneficiaries] = useState<string[]>(preselectedBeneficiaryIds);
   const [selectedOrganization, setSelectedOrganization] = useState<string>('');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [selectedFamily, setSelectedFamily] = useState<string>('');
   const [packageCode, setPackageCode] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [priority, setPriority] = useState<'normal' | 'high' | 'urgent'>('normal');
   const [scheduledDate, setScheduledDate] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [institutionSearch, setInstitutionSearch] = useState('');
   
   // حالة استيراد المستفيدين
   const [showImportModal, setShowImportModal] = useState(false);
@@ -47,6 +49,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
   // Get beneficiaries data
   const allBeneficiaries = mockBeneficiaries;
   const organizations = mockOrganizations;
+  const families = mockFamilies;
   const packageTemplates = mockPackageTemplates;
 
   // Filter beneficiaries for search
@@ -58,8 +61,19 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
 
   const selectedBeneficiariesData = allBeneficiaries.filter(b => selectedBeneficiaries.includes(b.id));
   const selectedOrganizationData = organizations.find(org => org.id === selectedOrganization);
+  const selectedFamilyData = families.find(f => f.id === selectedFamily);
   const selectedTemplateData = packageTemplates.find(t => t.id === selectedTemplate);
-  const availableTemplates = packageTemplates.filter(t => t.organization_id === selectedOrganization);
+  
+  // الحصول على القوالب المتاحة بناءً على المصدر المحدد
+  const availableTemplates = selectedOrganization 
+    ? packageTemplates.filter(t => t.organization_id === selectedOrganization)
+    : selectedFamily 
+    ? packageTemplates.filter(t => t.family_id === selectedFamily)
+    : [];
+
+  const filteredInstitutions = organizations.filter(inst =>
+    inst.name.toLowerCase().includes(institutionSearch.toLowerCase())
+  );
 
   const handleSelectBeneficiary = (beneficiaryId: string) => {
     setSelectedBeneficiaries(prev => 
@@ -79,8 +93,8 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       return;
     }
 
-    if (!selectedOrganization || (!selectedTemplate && !packageCode)) {
-      alert('يرجى اختيار المؤسسة والطرد (قالب أو كود)');
+    if ((!selectedOrganization && !selectedFamily) || (!selectedTemplate && !packageCode)) {
+      alert('يرجى اختيار مصدر الطرد (مؤسسة أو عائلة) والطرد (قالب أو كود)');
       return;
     }
 
@@ -90,15 +104,17 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
   const executeCreateTasks = () => {
     const taskId = `TASK-${Date.now()}`;
     const packageInfo = selectedTemplateData ? selectedTemplateData.name : `طرد برقم: ${packageCode}`;
+    const sourceInfo = selectedOrganizationData ? selectedOrganizationData.name : selectedFamilyData ? selectedFamilyData.name : 'غير محدد';
     
     // محاكاة إنشاء المهام
     logInfo(`تم إنشاء ${selectedBeneficiaries.length} مهمة جديدة`, 'BulkTasksPage');
     
-    alert(`تم إنشاء المهام بنجاح!\n\nرقم المهمة: ${taskId}\nعدد المستفيدين: ${selectedBeneficiaries.length}\nالطرد: ${packageInfo}\nالمؤسسة: ${selectedOrganizationData?.name}\n\nسيتم إشعار المندوبين قريباً`);
+    alert(`تم إنشاء المهام بنجاح!\n\nرقم المهمة: ${taskId}\nعدد المستفيدين: ${selectedBeneficiaries.length}\nالطرد: ${packageInfo}\nالمصدر: ${sourceInfo}\n\nسيتم إشعار المندوبين قريباً`);
     
     // Reset form
     setSelectedBeneficiaries([]);
     setSelectedOrganization('');
+    setSelectedFamily('');
     setSelectedTemplate('');
     setPackageCode('');
     setNotes('');
@@ -272,11 +288,9 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">إنشاء مهام جماعية</h2>
-          <p className="text-gray-600 mt-1">إنشاء مهام توزيع لمجموعة من المستفيدين</p>
-        </div>
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">إنشاء مهام جماعية</h2>
+        <p className="text-gray-600 mt-1">إنشاء مهام توزيع لمجموعة من المستفيدين</p>
       </div>
 
       {/* Progress Indicator */}
@@ -405,7 +419,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       {selectedBeneficiaries.length > 0 && (
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-gray-900">اختيار المؤسسة المانحة</h3>
+            <h3 className="text-lg font-bold text-gray-900">اختيار مصدر الطرود</h3>
             {selectedOrganization && (
               <div className="flex items-center space-x-2 space-x-reverse text-green-600">
                 <CheckCircle className="w-5 h-5" />
@@ -414,44 +428,141 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
             )}
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {organizations.map((organization) => (
-              <div
-                key={organization.id}
-                onClick={() => setSelectedOrganization(organization.id)}
-                className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
-                  selectedOrganization === organization.id
-                    ? 'border-blue-500 bg-blue-50 shadow-lg'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="flex items-center space-x-3 space-x-reverse mb-3">
-                  <div className="bg-blue-100 p-2 rounded-lg">
-                    <Building2 className="w-5 h-5 text-blue-600" />
+          {/* طرود داخلية - ثابتة في البداية */}
+          <div className="mb-6">
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-6 shadow-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4 space-x-reverse">
+                  <div className="bg-green-100 p-3 rounded-xl border-2 border-green-200">
+                    <Package className="w-8 h-8 text-green-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">{organization.name}</h4>
-                    <p className="text-sm text-gray-600">{organization.type}</p>
+                    <div className="flex items-center space-x-2 space-x-reverse mb-2">
+                      <h4 className="text-xl font-bold text-gray-900">طرود داخلية - من المنصة</h4>
+                      <Badge variant="success" className="bg-green-600 text-white">
+                        داخلي
+                      </Badge>
+                    </div>
+                    <p className="text-green-700 font-medium">طرود من مخزون المنصة الخاص</p>
+                    <p className="text-sm text-green-600 mt-1">
+                      1000 طرد متاح • 10 قوالب جاهزة • متاح فوراً
+                    </p>
                   </div>
                 </div>
-                <div className="text-xs text-gray-500">
-                  {organization.packagesAvailable || 0} طرد متاح • {organization.templatesCount || 0} قوالب
-                </div>
+                <button
+                  onClick={() => setSelectedOrganization(organizations.find(org => org.name === 'طرود داخلية - من المنصة')?.id || '')}
+                  className={`px-6 py-3 rounded-xl font-medium transition-all ${
+                    selectedOrganization === organizations.find(org => org.name === 'طرود داخلية - من المنصة')?.id
+                      ? 'bg-green-600 text-white shadow-lg'
+                      : 'bg-white text-green-600 border-2 border-green-300 hover:bg-green-50'
+                  }`}
+                >
+                  {selectedOrganization === organizations.find(org => org.name === 'طرود داخلية - من المنصة')?.id ? 'محدد' : 'اختيار'}
+                </button>
               </div>
-            ))}
+            </div>
+          </div>
+
+          {/* المؤسسات الخارجية */}
+          <div className="mb-6">
+            <div className="flex items-center space-x-3 space-x-reverse mb-4">
+              <Building2 className="w-5 h-5 text-blue-600" />
+              <h4 className="text-lg font-bold text-gray-900">المؤسسات الخيرية والدولية</h4>
+            </div>
+            
+            {/* شريط البحث للمؤسسات */}
+            <div className="relative mb-4">
+              <Search className="w-5 h-5 absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="ابحث عن المؤسسة..."
+                value={institutionSearch}
+                onChange={(e) => setInstitutionSearch(e.target.value)}
+                className="w-full pr-12 pl-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-60 overflow-y-auto">
+              {filteredInstitutions.filter(org => org.name !== 'طرود داخلية - من المنصة').map((organization) => (
+                <div
+                  key={organization.id}
+                  onClick={() => setSelectedOrganization(organization.id)}
+                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
+                    selectedOrganization === organization.id
+                      ? 'border-blue-500 bg-blue-50 shadow-lg'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3 space-x-reverse mb-3">
+                    <div className="bg-blue-100 p-2 rounded-lg">
+                      <Building2 className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{organization.name}</h4>
+                      <p className="text-sm text-gray-600">{organization.type}</p>
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {organization.packagesAvailable || 0} طرد متاح • {organization.templatesCount || 0} قوالب
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* العائلات المدعومة */}
+          <div>
+            <div className="flex items-center space-x-3 space-x-reverse mb-4">
+              <Heart className="w-5 h-5 text-purple-600" />
+              <h4 className="text-lg font-bold text-gray-900">العائلات المدعومة من مؤسسات خارجية</h4>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {families.map((family) => {
+                const familyTemplates = packageTemplates.filter(t => t.family_id === family.id);
+                return (
+                  <div
+                    key={family.id}
+                    onClick={() => setSelectedFamily(family.id)}
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
+                      selectedFamily === family.id
+                        ? 'border-purple-500 bg-purple-50 shadow-lg'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3 space-x-reverse mb-3">
+                      <div className="bg-purple-100 p-2 rounded-lg">
+                        <Heart className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{family.name}</h4>
+                        <p className="text-sm text-gray-600">{family.membersCount} فرد</p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {familyTemplates.length} قالب متاح • مدعوم خارجياً
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </Card>
       )}
 
       {/* Package Selection */}
-      {selectedOrganization && (
+      {(selectedOrganization || selectedFamily) && (
         <Card>
           <h3 className="text-lg font-bold text-gray-900 mb-6">تحديد الطرد</h3>
           
           <div className="grid md:grid-cols-2 gap-6">
             {/* Template Selection */}
             <div>
-              <h4 className="font-medium text-gray-900 mb-4">اختيار من القوالب المتاحة</h4>
+              <h4 className="font-medium text-gray-900 mb-4">
+                اختيار من القوالب المتاحة 
+                {selectedOrganizationData && ` - ${selectedOrganizationData.name}`}
+                {selectedFamilyData && ` - ${selectedFamilyData.name}`}
+              </h4>
               {availableTemplates.length > 0 ? (
                 <div className="space-y-3 max-h-60 overflow-y-auto">
                   {availableTemplates.map((template) => (
@@ -463,26 +574,33 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
                       }}
                       className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                         selectedTemplate === template.id
-                          ? 'border-green-500 bg-green-50'
+                          ? selectedFamily ? 'border-purple-500 bg-purple-50' : 'border-green-500 bg-green-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <h5 className="font-semibold text-gray-900">{template.name}</h5>
-                        <span className="text-sm font-bold text-green-600">{template.estimatedCost} ₪</span>
+                        <span className={`text-sm font-bold ${selectedFamily ? 'text-purple-600' : 'text-green-600'}`}>
+                          {template.estimatedCost} ₪
+                        </span>
                       </div>
                       <p className="text-sm text-gray-600">{template.contents.length} أصناف</p>
                       <div className="text-xs text-gray-500 mt-1">
                         {template.contents.slice(0, 2).map(item => item.name).join(', ')}
                         {template.contents.length > 2 && '...'}
                       </div>
+                      {selectedFamily && (
+                        <div className="mt-2 text-xs text-purple-600 font-medium">
+                          مدعوم من مؤسسة خارجية
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <Package className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                  <p>لا توجد قوالب متاحة</p>
+                  <p>لا توجد قوالب متاحة لهذا المصدر</p>
                 </div>
               )}
             </div>
@@ -567,7 +685,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       )}
 
       {/* Summary and Create Tasks */}
-      {selectedBeneficiaries.length > 0 && selectedOrganization && (selectedTemplate || packageCode) && (
+      {selectedBeneficiaries.length > 0 && (selectedOrganization || selectedFamily) && (selectedTemplate || packageCode) && (
         <Card>
           <h3 className="text-lg font-bold text-gray-900 mb-6">ملخص المهام</h3>
           
@@ -582,11 +700,17 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
               </div>
 
               <div className="text-center">
-                <div className="bg-green-100 p-3 rounded-xl mb-2">
-                  <Building2 className="w-6 h-6 text-green-600 mx-auto" />
+                <div className={`p-3 rounded-xl mb-2 ${selectedFamily ? 'bg-purple-100' : 'bg-green-100'}`}>
+                  {selectedFamily ? (
+                    <Heart className="w-6 h-6 text-purple-600 mx-auto" />
+                  ) : (
+                    <Building2 className="w-6 h-6 text-green-600 mx-auto" />
+                  )}
                 </div>
-                <p className="text-sm text-gray-600">المؤسسة</p>
-                <p className="text-lg font-bold text-green-900">{selectedOrganizationData?.name}</p>
+                <p className="text-sm text-gray-600">{selectedFamily ? 'العائلة' : 'المصدر'}</p>
+                <p className={`text-lg font-bold ${selectedFamily ? 'text-purple-900' : 'text-green-900'}`}>
+                  {selectedOrganizationData?.name || selectedFamilyData?.name}
+                </p>
               </div>
 
               <div className="text-center">
@@ -619,12 +743,23 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
               <h4 className="font-medium text-gray-900 mb-3">تفاصيل الطرد</h4>
               <div className="grid md:grid-cols-2 gap-4 text-sm">
                 <div>
+                  <span className="text-gray-600">المصدر:</span>
+                  <span className="font-bold text-gray-900 mr-2">
+                    {selectedOrganizationData?.name || selectedFamilyData?.name}
+                  </span>
+                  {selectedFamily && (
+                    <span className="text-xs text-purple-600 block mt-1">
+                      مدعوم من مؤسسة خارجية
+                    </span>
+                  )}
+                </div>
+                <div>
                   <span className="text-gray-600">التكلفة الإجمالية:</span>
                   <span className="font-bold text-green-600 mr-2">
                     {(selectedBeneficiaries.length * selectedTemplateData.estimatedCost).toLocaleString()} ₪
                   </span>
                 </div>
-                <div>
+                <div className="md:col-span-2">
                   <span className="text-gray-600">الوزن الإجمالي:</span>
                   <span className="font-bold text-gray-900 mr-2">
                     {(selectedBeneficiaries.length * selectedTemplateData.totalWeight).toFixed(1)} كيلو
@@ -670,8 +805,8 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
                   <span className="font-medium text-gray-900">{selectedBeneficiaries.length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">المؤسسة:</span>
-                  <span className="font-medium text-gray-900">{selectedOrganizationData?.name}</span>
+                  <span className="text-gray-600">المصدر:</span>
+                  <span className="font-medium text-gray-900">{selectedOrganizationData?.name || selectedFamilyData?.name}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">الطرد:</span>
