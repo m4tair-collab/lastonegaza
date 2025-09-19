@@ -95,6 +95,7 @@ export interface PackageTemplate {
   name: string;
   type: 'food' | 'medical' | 'clothing' | 'hygiene' | 'emergency';
   organization_id: string;
+  family_id?: string; // إضافة دعم للعائلات
   description: string;
   contents: PackageItem[];
   status: 'active' | 'draft' | 'inactive';
@@ -454,21 +455,21 @@ export const mockOrganizations: Organization[] = [
     isPopular: false
   },
   {
-    id: uuidv4(),
-    name: 'CRS',
-    type: 'منظمة دولية',
-    location: 'غزة - مكتب رئيسي',
-    contactPerson: 'جون سميث',
-    phone: '+970591234567',
-    email: 'info@crs.org',
+    id: 'org-internal',
+    name: 'طرود داخلية - من المنصة',
+    type: 'طرود داخلية',
+    location: 'غزة - المقر الرئيسي',
+    contactPerson: 'فريق الإدارة',
+    phone: '0599000000',
+    email: 'internal@platform.ps',
+    status: 'active',
     beneficiariesCount: 0,
     packagesCount: 0,
-    completionRate: 0,
-    status: 'active',
-    createdAt: '2024-01-25',
-    packagesAvailable: 500,
-    templatesCount: 3,
-    isPopular: true
+    completionRate: 100,
+    createdAt: '2023-01-01T00:00:00Z',
+    packagesAvailable: 1000,
+    templatesCount: 10,
+    isPopular: true,
   },
   {
     id: crsOrgId,
@@ -485,6 +486,23 @@ export const mockOrganizations: Organization[] = [
     createdAt: '2024-01-25',
     packagesAvailable: 500,
     templatesCount: 3,
+    isPopular: true
+  },
+  {
+    id: uuidv4(),
+    name: 'طرود داخلية - من المنصة',
+    type: 'طرود داخلية',
+    location: 'المنصة - مخزون داخلي',
+    contactPerson: 'إدارة المنصة',
+    phone: '+970591111111',
+    email: 'internal@platform.ps',
+    beneficiariesCount: 0,
+    packagesCount: 0,
+    completionRate: 100,
+    status: 'active',
+    createdAt: '2024-01-01',
+    packagesAvailable: 1000,
+    templatesCount: 10,
     isPopular: true
   }
 ];
@@ -512,6 +530,72 @@ export const mockPackageTemplates: PackageTemplate[] = [
     usageCount: 247,
     totalWeight: 14.6,
     estimatedCost: 50
+  },
+  // قوالب طرود داخلية من المنصة
+  {
+    id: 'template-internal-1',
+    name: 'طرد غذائي أساسي (داخلي)',
+    type: 'food',
+    organization_id: 'org-internal',
+    description: 'طرد غذائي أساسي من مخزون المنصة، يكفي لأسرة متوسطة لمدة أسبوع.',
+    contents: [
+      { id: 'item-1', name: 'أرز', quantity: 5, unit: 'كيلو', weight: 5 },
+      { id: 'item-2', name: 'سكر', quantity: 2, unit: 'كيلو', weight: 2 },
+      { id: 'item-3', name: 'زيت', quantity: 1, unit: 'لتر', weight: 1 },
+    ],
+    status: 'active',
+    createdAt: '2024-01-01T00:00:00Z',
+    usageCount: 150,
+    totalWeight: 8,
+    estimatedCost: 40,
+  },
+  {
+    id: 'template-internal-2',
+    name: 'طرد طوارئ سريع (داخلي)',
+    type: 'emergency',
+    organization_id: 'org-internal',
+    description: 'طرد طوارئ سريع للاستجابة العاجلة، يحتوي على مواد أساسية للبقاء.',
+    contents: [{ id: 'item-1', name: 'معلبات', quantity: 10, unit: 'علبة', weight: 5 }],
+    status: 'active',
+    createdAt: '2024-01-01T00:00:00Z',
+    usageCount: 75,
+    totalWeight: 5,
+    estimatedCost: 30,
+  },
+  // قوالب طرود العائلات
+  {
+    id: 'template-family-1',
+    name: 'طرد دعم عائلة أبو عامر',
+    type: 'food',
+    organization_id: 'org-1', // اللجنة المصرية
+    family_id: 'family-1',
+    description: 'طرد غذائي مخصص لعائلة أبو عامر بدعم من اللجنة المصرية.',
+    contents: [
+      { id: 'item-1', name: 'أرز', quantity: 10, unit: 'كيلو', weight: 10 },
+      { id: 'item-2', name: 'عدس', quantity: 5, unit: 'كيلو', weight: 5 },
+    ],
+    status: 'active',
+    createdAt: '2024-06-01T00:00:00Z',
+    usageCount: 20,
+    totalWeight: 15,
+    estimatedCost: 70,
+  },
+  {
+    id: 'template-family-2',
+    name: 'طرد دعم عائلة النجار',
+    type: 'hygiene',
+    organization_id: 'org-3', // الهلال الأحمر المصري
+    family_id: 'family-2',
+    description: 'طرد نظافة شخصية مخصص لعائلة النجار بدعم من الهلال الأحمر المصري.',
+    contents: [
+      { id: 'item-1', name: 'صابون', quantity: 6, unit: 'قطعة', weight: 1.5 },
+      { id: 'item-2', name: 'شامبو', quantity: 2, unit: 'زجاجة', weight: 1 },
+    ],
+    status: 'active',
+    createdAt: '2024-06-05T00:00:00Z',
+    usageCount: 10,
+    totalWeight: 2.5,
+    estimatedCost: 25,
   },
   {
     id: uuidv4(),
@@ -601,7 +685,8 @@ export const mockFamilies: Family[] = [
     packagesDistributed: 1,
     completionRate: 100,
     location: 'خان يونس - الفخاري',
-    createdAt: '2024-01-25'
+    createdAt: '2024-01-25',
+    supportingOrganizationId: org3Id // الإغاثة الإسلامية
   }
 ];
 
