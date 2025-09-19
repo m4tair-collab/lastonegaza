@@ -1491,8 +1491,8 @@ export const getBeneficiariesByFamily = (familyId: string): Beneficiary[] => {
 };
 
 // دالة لحساب إحصائيات دفعة التوزيع
-export const getBatchStatistics = (batchId: string) => {
-  const batchTasks = mockTasks.filter(task => task.batchId === batchId);
+export const calculateBatchStatistics = (batchId: string) => {
+  const batchTasks = getTasksByBatch(batchId);
   const totalTasks = batchTasks.length;
   const deliveredTasks = batchTasks.filter(task => task.status === 'delivered').length;
   const failedTasks = batchTasks.filter(task => task.status === 'failed').length;
@@ -1550,24 +1550,6 @@ export const getTasksByBatch = (batchId: string): Task[] => {
 
 export const getBatchesByOrganization = (organizationId: string): DistributionBatch[] => {
   return mockDistributionBatches.filter(batch => batch.organizationId === organizationId);
-};
-
-export const calculateBatchStatistics = (batchId: string) => {
-  const batchTasks = getTasksByBatch(batchId);
-  const totalTasks = batchTasks.length;
-  const deliveredTasks = batchTasks.filter(t => t.status === 'delivered').length;
-  const failedTasks = batchTasks.filter(t => t.status === 'failed').length;
-  const pendingTasks = batchTasks.filter(t => ['pending', 'assigned', 'in_progress', 'rescheduled'].includes(t.status)).length;
-  
-  return {
-    totalTasks,
-    totalBeneficiaries: totalTasks, // كل مهمة = مستفيد واحد
-    deliveredTasks,
-    failedTasks,
-    pendingTasks,
-    deliveryRate: totalTasks > 0 ? Math.round((deliveredTasks / totalTasks) * 100) : 0,
-    failureRate: totalTasks > 0 ? Math.round((failedTasks / totalTasks) * 100) : 0
-  };
 };
 
 // Statistics calculations
