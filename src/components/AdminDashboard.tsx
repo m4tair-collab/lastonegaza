@@ -18,8 +18,6 @@ import StatusManagementPage from './pages/StatusManagementPage';
 import DelayedBeneficiariesPage from './pages/DelayedBeneficiariesPage';
 import ActivityLogPage from './pages/ActivityLogPage';
 import PackageListPage from './pages/PackageListPage';
-import BulkSendPage from './pages/BulkSendPage';
-import IndividualSendPage from './pages/IndividualSendPage';
 import TrackingPage from './pages/TrackingPage';
 import DistributionReportsPage from './pages/DistributionReportsPage';
 import OrganizationsListPage from './pages/OrganizationsListPage';
@@ -101,8 +99,6 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
       children: [
         { id: 'packages-list', name: 'قوالب الطرود', icon: Package },
         { id: 'bulk-tasks', name: 'المهام الجماعية', icon: Send },
-        { id: 'bulk-send', name: 'إرسال جماعي', icon: Users },
-        { id: 'individual-send', name: 'إرسال فردي', icon: UserPlus },
         { id: 'tracking', name: 'تتبع الإرسالات', icon: Truck },
         { id: 'distribution-reports', name: 'تقارير التوزيع', icon: BarChart3 }
       ]
@@ -279,8 +275,6 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
       'delayed': 'المستفيدين الذين لم يستلموا طرودهم في الوقت المحدد',
       'activity-log': 'سجل جميع الأنشطة والعمليات في النظام',
       'packages-list': 'إنشاء وإدارة قوالب الطرود وعمليات التوزيع',
-      'bulk-send': 'إرسال طرود متعددة للمستفيدين',
-      'individual-send': 'إرسال طرد لمستفيد واحد',
       'tracking': 'تتبع حالة الطرود والإرسالات',
       'distribution-reports': 'تقارير مفصلة عن عمليات التوزيع',
       'organizations': 'إدارة المؤسسات الخيرية والإنسانية',
@@ -419,43 +413,6 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
           </div>
           <PackageListPage 
             key={`packages-${Date.now()}`} 
-          />
-        </div>
-      );
-    }
-
-    if (activeTab === 'bulk-send') {
-      return (
-        <div className="space-y-6">
-          <div className="flex items-center space-x-4 space-x-reverse">
-            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-              <IconComponent className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900">{pageInfo.name}</h2>
-              <p className="text-gray-600 mt-1">{pageInfo.description}</p>
-            </div>
-          </div>
-          <BulkSendPage />
-        </div>
-      );
-    }
-
-    if (activeTab === 'individual-send') {
-      return (
-        <div className="space-y-6">
-          <div className="flex items-center space-x-4 space-x-reverse">
-            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-              <IconComponent className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900">{pageInfo.name}</h2>
-              <p className="text-gray-600 mt-1">{pageInfo.description}</p>
-            </div>
-          </div>
-          <IndividualSendPage
-            beneficiaryIdToPreselect={beneficiaryIdForIndividualSend}
-            onBeneficiaryPreselected={() => setBeneficiaryIdForIndividualSend(null)} 
           />
         </div>
       );
