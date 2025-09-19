@@ -177,6 +177,7 @@ export interface Task {
   packageId: string;
   beneficiaryId: string;
   courierId?: string;
+  batchId?: string; // معرف دفعة التوزيع
   status: 'pending' | 'assigned' | 'in_progress' | 'delivered' | 'failed' | 'rescheduled';
   createdAt: string;
   scheduledAt?: string;
@@ -243,6 +244,16 @@ export interface SystemUser {
   status: 'active' | 'inactive' | 'suspended';
   lastLogin: string;
   createdAt: string;
+}
+
+export interface DistributionBatch {
+  id: string;
+  name: string;
+  organizationId: string;
+  description?: string;
+  createdAt: string;
+  createdBy: string;
+  status: 'active' | 'completed' | 'paused';
 }
 
 // Define UUIDs for main entities first to link them
@@ -314,6 +325,12 @@ const activity2Id = uuidv4();
 const activity3Id = uuidv4();
 const activity4Id = uuidv4();
 const activity5Id = uuidv4();
+
+// Distribution Batches IDs
+const batch1Id = uuidv4();
+const batch2Id = uuidv4();
+const batch3Id = uuidv4();
+const batch4Id = uuidv4();
 
 // Mock Data
 export const mockOrganizations: Organization[] = [
@@ -588,6 +605,45 @@ export const mockPackageTemplates: PackageTemplate[] = [
     usageCount: 0,
     totalWeight: 1.5,
     estimatedCost: 30
+  }
+];
+
+export const mockDistributionBatches: DistributionBatch[] = [
+  {
+    id: batch1Id,
+    name: 'حملة رمضان 2025 - الهلال الأحمر',
+    organizationId: org1Id,
+    description: 'توزيع طرود غذائية شاملة لشهر رمضان المبارك على العائلات المحتاجة في قطاع غزة',
+    createdAt: '2024-12-01',
+    createdBy: 'أحمد محمد الإدمن',
+    status: 'active'
+  },
+  {
+    id: batch2Id,
+    name: 'حملة الشتاء الدافئ - أطباء بلا حدود',
+    organizationId: org2Id,
+    description: 'توزيع ملابس شتوية وبطانيات للعائلات النازحة في شمال غزة',
+    createdAt: '2024-11-15',
+    createdBy: 'فاطمة أحمد المشرفة',
+    status: 'completed'
+  },
+  {
+    id: batch3Id,
+    name: 'طرود الطوارئ الطبية - الإغاثة الإسلامية',
+    organizationId: org3Id,
+    description: 'توزيع أدوية أساسية ومستلزمات طبية للمرضى المزمنين',
+    createdAt: '2024-12-10',
+    createdBy: 'خالد أبو يوسف',
+    status: 'active'
+  },
+  {
+    id: batch4Id,
+    name: 'مساعدات عاجلة - الأونروا',
+    organizationId: instUnrwaId,
+    description: 'توزيع مساعدات غذائية وطبية عاجلة للمتضررين من القصف الأخير',
+    createdAt: '2024-12-15',
+    createdBy: 'د. أحمد المدير',
+    status: 'active'
   }
 ];
 
@@ -1026,6 +1082,7 @@ export const mockTasks: Task[] = [
     packageId: package1Id,
     beneficiaryId: beneficiary1Id,
     courierId: courier1Id,
+    batchId: batch1Id,
     status: 'delivered',
     createdAt: '2024-12-20',
     scheduledAt: '2024-12-20',
@@ -1041,6 +1098,7 @@ export const mockTasks: Task[] = [
     packageId: package2Id,
     beneficiaryId: beneficiary2Id,
     courierId: courier2Id,
+    batchId: batch2Id,
     status: 'in_progress',
     createdAt: '2024-12-19',
     scheduledAt: '2024-12-21',
@@ -1052,6 +1110,7 @@ export const mockTasks: Task[] = [
     id: task3Id,
     packageId: package3Id,
     beneficiaryId: beneficiary3Id,
+    batchId: batch3Id,
     status: 'pending',
     createdAt: '2024-12-18',
     notes: 'في انتظار تعيين مندوب'
@@ -1456,6 +1515,37 @@ export const getTemplatesByOrganization = (organizationId: string): PackageTempl
 
 export const getTemplateById = (id: string): PackageTemplate | undefined => {
   return mockPackageTemplates.find(template => template.id === id);
+};
+
+// Distribution Batches helper functions
+export const getBatchById = (id: string): DistributionBatch | undefined => {
+  return mockDistributionBatches.find(batch => batch.id === id);
+};
+
+export const getTasksByBatch = (batchId: string): Task[] => {
+  return mockTasks.filter(t => t.batchId === batchId);
+};
+
+export const getBatchesByOrganization = (organizationId: string): DistributionBatch[] => {
+  return mockDistributionBatches.filter(batch => batch.organizationId === organizationId);
+};
+
+export const calculateBatchStatistics = (batchId: string) => {
+  const batchTasks = getTasksByBatch(batchId);
+  const totalTasks = batchTasks.length;
+  const deliveredTasks = batchTasks.filter(t => t.status === 'delivered').length;
+  const failedTasks = batchTasks.filter(t => t.status === 'failed').length;
+  const pendingTasks = batchTasks.filter(t => ['pending', 'assigned', 'in_progress', 'rescheduled'].includes(t.status)).length;
+  
+  return {
+    totalTasks,
+    totalBeneficiaries: totalTasks, // كل مهمة = مستفيد واحد
+    deliveredTasks,
+    failedTasks,
+    pendingTasks,
+    deliveryRate: totalTasks > 0 ? Math.round((deliveredTasks / totalTasks) * 100) : 0,
+    failureRate: totalTasks > 0 ? Math.round((failedTasks / totalTasks) * 100) : 0
+  };
 };
 
 // Statistics calculations
