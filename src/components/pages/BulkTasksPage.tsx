@@ -3,6 +3,7 @@ import { Package, Users, Send, CheckCircle, AlertTriangle, Clock, Building2, Sea
 import { 
   mockBeneficiaries, 
   mockOrganizations, 
+  mockFamilies,
   mockPackageTemplates,
   addOrUpdateBeneficiaryFromImport,
   generateBeneficiariesCSVTemplate,
