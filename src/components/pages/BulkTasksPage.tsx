@@ -299,15 +299,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
             <Button
               variant="secondary"
               icon={ArrowLeft}
-              iconPosition="right"
-              onClick={onNavigateBack}
-            >
-              العودة للقائمة
-            </Button>
-          )}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">إنشاء مهام جماعية</h2>
-            <p className="text-gray-600 mt-1">إنشاء مهام توزيع لمجموعة من المستفيدين</p>
+          <Button variant="primary" icon={Download} iconPosition="right">
           </div>
         </div>
         <div className="flex space-x-3 space-x-reverse">
