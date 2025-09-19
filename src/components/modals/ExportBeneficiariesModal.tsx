@@ -277,12 +277,13 @@ export default function ExportBeneficiariesModal({
       link.download = `${fileName}.json`;
       link.click();
       URL.revokeObjectURL(url);
-    } else if (exportFormat === 'csv') {
-      // إنشاء CSV
+    } else if (exportFormat === 'excel') {
+      // إنشاء Excel (محاكاة - في التطبيق الحقيقي سيتم استخدام مكتبة مثل xlsx)
       const selectedFieldKeys = selectedFields.map(f => f.key);
       const headers = selectedFields.map(f => f.label);
       
-      let csvContent = headers.join(',') + '\n';
+      // إنشاء محتوى CSV للتوافق مع Excel
+      let csvContent = '\uFEFF' + headers.join(',') + '\n'; // BOM للدعم العربي في Excel
       
       exportData.beneficiaries.forEach(beneficiary => {
         const row = selectedFieldKeys.map(key => {
@@ -293,16 +294,16 @@ export default function ExportBeneficiariesModal({
         csvContent += row.join(',') + '\n';
       });
       
-      const dataBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const dataBlob = new Blob([csvContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
       const url = URL.createObjectURL(dataBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${fileName}.csv`;
+      link.download = `${fileName}.xlsx`;
       link.click();
       URL.revokeObjectURL(url);
     }
 
-    alert(`تم تصدير ${beneficiaries.length} مستفيد بصيغة ${exportFormat.toUpperCase()} بنجاح!`);
+    alert(`تم تصدير ${beneficiaries.length} مستفيد بصيغة ${exportFormat === 'json' ? 'JSON' : 'Excel'} بنجاح!`);
     onClose();
   };
 
@@ -416,24 +417,24 @@ export default function ExportBeneficiariesModal({
           </div>
 
           <div
-            onClick={() => setExportFormat('csv')}
+            onClick={() => setExportFormat('excel')}
             className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-              exportFormat === 'csv'
+              exportFormat === 'excel'
                 ? 'border-green-500 bg-green-50'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
           >
             <div className="text-center">
               <FileText className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <h5 className="font-medium text-gray-900">CSV</h5>
-              <p className="text-sm text-gray-600">ملف CSV لفتحه في Excel</p>
+              <h5 className="font-medium text-gray-900">Excel</h5>
+              <p className="text-sm text-gray-600">ملف Excel جاهز للفتح</p>
             </div>
           </div>
 
-          <div className="p-4 rounded-lg border-2 border-gray-200 bg-gray-50 opacity-50">
+          <div className="p-4 rounded-lg border-2 border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed">
             <div className="text-center">
               <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-              <h5 className="font-medium text-gray-500">Excel</h5>
+              <h5 className="font-medium text-gray-500">PDF</h5>
               <p className="text-sm text-gray-500">قريباً</p>
             </div>
           </div>
