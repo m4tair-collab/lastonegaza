@@ -151,12 +151,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       // محاكاة تحليل البيانات من CSV
       const mockCSVData = [
         { name: 'أحمد محمد المستورد', nationalId: '900111111', phone: '0597111111', alternativePhone: '0598111111' },
-        { name
-        }
-      ]
-    }
-  }
-}: 'فاطمة سالم المستوردة', nationalId: '900222222', phone: '0597222222', alternativePhone: '' },
+        { name: 'فاطمة سالم المستوردة', nationalId: '900222222', phone: '0597222222', alternativePhone: '' },
         { name: 'محمد علي المستورد', nationalId: '900333333', phone: '0597333333', alternativePhone: '0598333333' },
         { name: 'سارة أحمد المستوردة', nationalId: '900444444', phone: '0597444444', alternativePhone: '' },
         { name: 'خالد يوسف المستورد', nationalId: '900555555', phone: '0597555555', alternativePhone: '0598555555' },
@@ -304,7 +299,15 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
             <Button
               variant="secondary"
               icon={ArrowLeft}
-          <Button variant="primary" icon={Download} iconPosition="right">
+              iconPosition="right"
+              onClick={onNavigateBack}
+            >
+              العودة
+            </Button>
+          )}
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">إنشاء مهام جماعية</h1>
+            <p className="text-gray-600">إنشاء مهام توزيع لعدة مستفيدين في نفس الوقت</p>
           </div>
         </div>
         <div className="flex space-x-3 space-x-reverse">
@@ -315,6 +318,9 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
             onClick={() => setShowImportModal(true)}
           >
             استيراد مستفيدين
+          </Button>
+          <Button variant="primary" icon={Download} iconPosition="right">
+            تحميل قالب
           </Button>
         </div>
       </div>
@@ -403,6 +409,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       <Card>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-gray-900">إضافة مستفيدين إضافيين</h3>
+          <div className="flex space-x-2 space-x-reverse">
             <Button
               variant="primary"
               icon={Upload}
@@ -413,6 +420,7 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
               استيراد من ملف
             </Button>
           </div>
+        </div>
         
         <div className="mb-4">
           <Input
