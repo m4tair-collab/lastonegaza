@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Shield, Building2, Users, LogIn, Mail, Lock, Eye, EyeOff, AlertTriangle, CheckCircle } from 'lucide-react';
-import { mockSystemUsers, mockOrganizations, mockFamilies, type SystemUser } from '../data/mockData';
+import { mockSystemUsers, mockFamilies, type SystemUser } from '../data/mockData';
 
 interface MockLoginProps {
   onLogin: (user: SystemUser) => void;
@@ -21,22 +21,6 @@ export default function MockLogin({ onLogin }: MockLoginProps) {
       type: 'admin',
       icon: Shield,
       color: 'bg-blue-600'
-    },
-    {
-      email: 'supervisor@redcrescent-gaza.org',
-      name: 'فاطمة أحمد - الهلال الأحمر',
-      role: 'مشرف المؤسسة',
-      type: 'organization',
-      icon: Building2,
-      color: 'bg-green-600'
-    },
-    {
-      email: 'supervisor@crs-gaza.org',
-      name: 'جون سميث - CRS',
-      role: 'مشرف المؤسسة',
-      type: 'organization',
-      icon: Building2,
-      color: 'bg-purple-600'
     },
     {
       email: 'family@abuamer.ps',
@@ -81,10 +65,6 @@ export default function MockLogin({ onLogin }: MockLoginProps) {
   };
 
   const getAssociatedEntityName = (user: SystemUser) => {
-    if (user.associatedType === 'organization' && user.associatedId) {
-      const org = mockOrganizations.find(o => o.id === user.associatedId);
-      return org ? ` - ${org.name}` : '';
-    }
     if (user.associatedType === 'family' && user.associatedId) {
       const family = mockFamilies.find(f => f.id === user.associatedId);
       return family ? ` - ${family.name}` : '';
@@ -231,7 +211,7 @@ export default function MockLogin({ onLogin }: MockLoginProps) {
                     <div key={user.id} className="flex justify-between items-center">
                       <span className="text-gray-700 text-xs">{user.email}</span>
                       <span className="text-gray-500 text-xs">
-                        {user.name.split(' - ')[0]}{associatedName}
+                        {user.name}{associatedName}
                       </span>
                     </div>
                   );

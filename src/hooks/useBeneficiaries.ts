@@ -3,7 +3,6 @@ import { type Beneficiary, mockBeneficiaries } from '../data/mockData';
 import { useErrorLogger } from '../utils/errorLogger';
 
 interface UseBeneficiariesOptions {
-  organizationId?: string;
   familyId?: string;
   searchTerm?: string;
   statusFilter?: string;
@@ -41,11 +40,6 @@ export const useBeneficiaries = (options: UseBeneficiariesOptions = {}) => {
         
         let filteredData = [...mockBeneficiaries];
         
-        // فلترة حسب المؤسسة
-        if (options.organizationId) {
-          filteredData = filteredData.filter(b => b.organizationId === options.organizationId);
-        }
-        
         // فلترة حسب العائلة
         if (options.familyId) {
           filteredData = filteredData.filter(b => b.familyId === options.familyId);
@@ -63,7 +57,7 @@ export const useBeneficiaries = (options: UseBeneficiariesOptions = {}) => {
     };
 
     fetchBeneficiaries();
-  }, [options.organizationId, options.familyId, logInfo, logError]);
+  }, [options.familyId, logInfo, logError]);
 
   // فلترة البيانات بناءً على البحث والفلاتر
   const filteredBeneficiaries = useMemo(() => {
@@ -247,7 +241,6 @@ export const useBeneficiaries = (options: UseBeneficiariesOptions = {}) => {
           additionalInfo: ''
         },
         location: beneficiaryData.location || { lat: 31.3469, lng: 34.3029 },
-        organizationId: beneficiaryData.organizationId,
         familyId: beneficiaryData.familyId,
         relationToFamily: beneficiaryData.relationToFamily,
         profession: beneficiaryData.profession || '',

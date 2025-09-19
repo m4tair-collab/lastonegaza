@@ -7,26 +7,7 @@ export interface User {
   email: string;
   phone: string;
   role: 'admin' | 'organization' | 'family';
-  organizationId?: string;
   familyId?: string;
-}
-
-export interface Organization {
-  id: string;
-  name: string;
-  type: string;
-  location: string;
-  contactPerson: string;
-  phone: string;
-  email: string;
-  beneficiariesCount: number;
-  packagesCount: number;
-  completionRate: number;
-  status: 'active' | 'pending' | 'suspended';
-  createdAt: string;
-  packagesAvailable: number;
-  templatesCount: number;
-  isPopular: boolean;
 }
 
 export interface Family {
@@ -63,7 +44,6 @@ export interface Beneficiary {
     additionalInfo: string;
   };
   location: { lat: number; lng: number };
-  organizationId?: string;
   familyId?: string;
   relationToFamily?: string;
   // Family hierarchy fields
@@ -94,7 +74,7 @@ export interface PackageTemplate {
   id: string;
   name: string;
   type: 'food' | 'medical' | 'clothing' | 'hygiene' | 'emergency';
-  organization_id: string;
+  family_id: string;
   description: string;
   contents: PackageItem[];
   status: 'active' | 'draft' | 'inactive';
@@ -151,7 +131,6 @@ export interface Package {
   description: string;
   value: number;
   funder: string;
-  organizationId?: string;
   familyId?: string;
   beneficiaryId?: string;
   status: 'pending' | 'assigned' | 'in_delivery' | 'delivered' | 'failed';
@@ -239,27 +218,15 @@ export interface SystemUser {
   phone: string;
   roleId: string;
   associatedId: string | null; // معرف المؤسسة أو العائلة المرتبطة
-  associatedType: 'organization' | 'family' | null; // نوع الكيان المرتبط
+  associatedType: 'family' | null; // نوع الكيان المرتبط
   status: 'active' | 'inactive' | 'suspended';
   lastLogin: string;
   createdAt: string;
 }
 
-// Define UUIDs for main entities first to link them
-const org1Id = uuidv4();
-const org2Id = uuidv4();
-const org3Id = uuidv4();
-const crsOrgId = uuidv4(); // معرف مؤسسة CRS
-
 const family1Id = uuidv4();
 const family2Id = uuidv4();
 const family3Id = uuidv4();
-
-const instUnrwaId = uuidv4();
-const instWfpId = uuidv4();
-const instRedCrescentId = uuidv4();
-const instWhoId = uuidv4();
-const instUnicefId = uuidv4();
 
 const perm1Id = uuidv4();
 const perm2Id = uuidv4(); // تعديل جميع البيانات
@@ -315,187 +282,13 @@ const activity3Id = uuidv4();
 const activity4Id = uuidv4();
 const activity5Id = uuidv4();
 
-// Mock Data
-export const mockOrganizations: Organization[] = [
-  {
-    id: org1Id,
-    name: 'جمعية الهلال الأحمر الفلسطيني - غزة',
-    type: 'طعام - ملابس',
-    location: 'خان يونس - الكتيبة',
-    contactPerson: 'أحمد أبو سالم',
-    phone: '0501234567',
-    email: 'info@redcrescent-gaza.org',
-    beneficiariesCount: 342,
-    packagesCount: 87,
-    completionRate: 92,
-    status: 'active',
-    createdAt: '2024-01-15',
-    packagesAvailable: 189,
-    templatesCount: 6,
-    isPopular: true
-  },
-  {
-    id: org2Id,
-    name: 'مؤسسة أطباء بلا حدود - غزة',
-    type: 'أدوية - معدات طبية',
-    location: 'غزة - الشجاعية',
-    contactPerson: 'د. فاطمة الغزاوي',
-    phone: '0559876543',
-    email: 'gaza@msf.org',
-    beneficiariesCount: 156,
-    packagesCount: 23,
-    completionRate: 75,
-    status: 'pending',
-    createdAt: '2024-02-01',
-    packagesAvailable: 95,
-    templatesCount: 4,
-    isPopular: true
-  },
-  {
-    id: org3Id,
-    name: 'جمعية الإغاثة الإسلامية - فلسطين',
-    type: 'مواد غذائية',
-    location: 'خان يونس - بني سهيلا',
-    contactPerson: 'خالد أبو يوسف',
-    phone: '0567891234',
-    email: 'palestine@islamic-relief.org',
-    beneficiariesCount: 89,
-    packagesCount: 45,
-    completionRate: 88,
-    status: 'active',
-    createdAt: '2024-01-20',
-    packagesAvailable: 156,
-    templatesCount: 7,
-    isPopular: false
-  },
-  {
-    id: instUnrwaId,
-    name: 'الأونروا',
-    type: 'منظمة دولية',
-    location: 'غزة - مكتب رئيسي',
-    contactPerson: 'د. أحمد المدير',
-    phone: '+970591111111',
-    email: 'gaza@unrwa.org',
-    beneficiariesCount: 0,
-    packagesCount: 0,
-    completionRate: 0,
-    status: 'active',
-    createdAt: '2024-01-01',
-    packagesAvailable: 1021,
-    templatesCount: 8,
-    isPopular: true
-  },
-  {
-    id: instWfpId,
-    name: 'برنامج الغذاء العالمي',
-    type: 'منظمة دولية',
-    location: 'غزة - مكتب إقليمي',
-    contactPerson: 'سارة المنسقة',
-    phone: '+970592222222',
-    email: 'gaza@wfp.org',
-    beneficiariesCount: 0,
-    packagesCount: 0,
-    completionRate: 0,
-    status: 'active',
-    createdAt: '2024-01-05',
-    packagesAvailable: 234,
-    templatesCount: 5,
-    isPopular: true
-  },
-  {
-    id: instRedCrescentId,
-    name: 'الهلال الأحمر الفلسطيني',
-    type: 'منظمة محلية',
-    location: 'غزة - المقر الرئيسي',
-    contactPerson: 'محمد المدير',
-    phone: '+970593333333',
-    email: 'info@palestinianredcrescent.org',
-    beneficiariesCount: 0,
-    packagesCount: 0,
-    completionRate: 0,
-    status: 'active',
-    createdAt: '2024-01-10',
-    packagesAvailable: 189,
-    templatesCount: 6,
-    isPopular: true
-  },
-  {
-    id: instWhoId,
-    name: 'منظمة الصحة العالمية',
-    type: 'منظمة دولية',
-    location: 'غزة - مكتب صحي',
-    contactPerson: 'د. فاطمة الطبيبة',
-    phone: '+970594444444',
-    email: 'gaza@who.int',
-    beneficiariesCount: 0,
-    packagesCount: 0,
-    completionRate: 0,
-    status: 'active',
-    createdAt: '2024-01-15',
-    packagesAvailable: 95,
-    templatesCount: 4,
-    isPopular: true
-  },
-  {
-    id: instUnicefId,
-    name: 'اليونيسف',
-    type: 'منظمة دولية',
-    location: 'غزة - مكتب الأطفال',
-    contactPerson: 'نور المنسقة',
-    phone: '+970595555555',
-    email: 'gaza@unicef.org',
-    beneficiariesCount: 0,
-    packagesCount: 0,
-    completionRate: 0,
-    status: 'active',
-    createdAt: '2024-01-20',
-    packagesAvailable: 156,
-    templatesCount: 7,
-    isPopular: false
-  },
-  {
-    id: uuidv4(),
-    name: 'CRS',
-    type: 'منظمة دولية',
-    location: 'غزة - مكتب رئيسي',
-    contactPerson: 'جون سميث',
-    phone: '+970591234567',
-    email: 'info@crs.org',
-    beneficiariesCount: 0,
-    packagesCount: 0,
-    completionRate: 0,
-    status: 'active',
-    createdAt: '2024-01-25',
-    packagesAvailable: 500,
-    templatesCount: 3,
-    isPopular: true
-  },
-  {
-    id: crsOrgId,
-    name: 'CRS - الخدمات الكاثوليكية للإغاثة',
-    type: 'منظمة دولية',
-    location: 'غزة - مكتب رئيسي',
-    contactPerson: 'جون سميث',
-    phone: '+970591234567',
-    email: 'info@crs-gaza.org',
-    beneficiariesCount: 45,
-    packagesCount: 12,
-    completionRate: 87,
-    status: 'active',
-    createdAt: '2024-01-25',
-    packagesAvailable: 500,
-    templatesCount: 3,
-    isPopular: true
-  }
-];
-
 // Mock Package Templates Data
 export const mockPackageTemplates: PackageTemplate[] = [
   {
     id: uuidv4(),
     name: 'طرد رمضان كريم 2024',
     type: 'food',
-    organization_id: instUnrwaId,
+    family_id: family1Id,
     description: 'طرد غذائي شامل لشهر رمضان المبارك',
     contents: [
       { id: uuidv4(), name: 'أرز بسمتي', quantity: 5, unit: 'كيلو', weight: 5 },
@@ -537,7 +330,7 @@ export const mockPackageTemplates: PackageTemplate[] = [
     id: uuidv4(),
     name: 'طرد الإسعافات الأولية',
     type: 'medical',
-    organization_id: instWhoId,
+    family_id: family3Id,
     description: 'طرد طبي للإسعافات الأولية',
     contents: [
       { id: uuidv4(), name: 'ضمادات طبية', quantity: 10, unit: 'قطعة', weight: 0.5 },
@@ -1378,16 +1171,8 @@ export const validateFamilyMemberAddition = (
   
   return { isValid: true };
 };
-export const getOrganizationById = (id: string): Organization | undefined => {
-  return mockOrganizations.find(org => org.id === id);
-};
-
 export const getFamilyById = (id: string): Family | undefined => {
   return mockFamilies.find(family => family.id === id);
-};
-
-export const getBeneficiariesByOrganization = (organizationId: string): Beneficiary[] => {
-  return mockBeneficiaries.filter(b => b.organizationId === organizationId);
 };
 
 export const getBeneficiariesByFamily = (familyId: string): Beneficiary[] => {
@@ -1410,8 +1195,8 @@ export const getCriticalAlerts = (): Alert[] => {
   return mockAlerts.filter(a => a.priority === 'critical' && !a.isRead);
 };
 
-export const getTemplatesByOrganization = (organizationId: string): PackageTemplate[] => {
-  return mockPackageTemplates.filter(template => template.organization_id === organizationId);
+export const getTemplatesByFamily = (familyId: string): PackageTemplate[] => {
+  return mockPackageTemplates.filter(template => template.family_id === familyId);
 };
 
 export const getTemplateById = (id: string): PackageTemplate | undefined => {
