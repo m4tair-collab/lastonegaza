@@ -1006,25 +1006,6 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium text-gray-900">تحميل قالب CSV جاهز</h4>
-                      <p className="text-sm text-gray-600">قالب يحتوي على أمثلة وتنسيق صحيح للبيانات</p>
-                    </div>
-                    <Button
-                      variant="secondary"
-                      icon={Download}
-                      iconPosition="right"
-                      onClick={downloadCSVTemplate}
-                    >
-                      تحميل القالب
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Instructions */}
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                  <h4 className="font-medium text-blue-800 mb-3">تعليمات الاستيراد</h4>
-                  <ul className="text-sm text-blue-700 space-y-2">
-                    <li className="flex items-start space-x-2 space-x-reverse">
-                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                       <span>الملف يجب أن يحتوي على عمود "الاسم" وعمود "رقم الهوية" كحد أدنى</span>
                     </li>
                     <li className="flex items-start space-x-2 space-x-reverse">
