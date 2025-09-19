@@ -1493,6 +1493,31 @@ export const getBeneficiariesByFamily = (familyId: string): Beneficiary[] => {
   return mockBeneficiaries.filter(b => b.familyId === familyId);
 };
 
+// دالة لحساب إحصائيات دفعة التوزيع
+export const getBatchStatistics = (batchId: string) => {
+  const batchTasks = mockTasks.filter(task => task.batchId === batchId);
+  const totalTasks = batchTasks.length;
+  const deliveredTasks = batchTasks.filter(task => task.status === 'delivered').length;
+  const failedTasks = batchTasks.filter(task => task.status === 'failed').length;
+  const pendingTasks = batchTasks.filter(task => task.status === 'pending').length;
+  const inProgressTasks = batchTasks.filter(task => task.status === 'in_progress').length;
+  const assignedTasks = batchTasks.filter(task => task.status === 'assigned').length;
+  const rescheduledTasks = batchTasks.filter(task => task.status === 'rescheduled').length;
+  
+  const successRate = totalTasks > 0 ? ((deliveredTasks / totalTasks) * 100) : 0;
+  
+  return {
+    totalTasks,
+    deliveredTasks,
+    failedTasks,
+    pendingTasks,
+    inProgressTasks,
+    assignedTasks,
+    rescheduledTasks,
+    successRate: Math.round(successRate * 10) / 10 // تقريب لرقم عشري واحد
+  };
+};
+
 export const getPackagesByBeneficiary = (beneficiaryId: string): Package[] => {
   return mockPackages.filter(p => p.beneficiaryId === beneficiaryId);
 };
