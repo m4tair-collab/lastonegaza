@@ -302,12 +302,12 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
               iconPosition="right"
               onClick={onNavigateBack}
             >
-              العودة
+              العودة للقائمة
             </Button>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">إنشاء مهام جماعية</h1>
-            <p className="text-gray-600">إنشاء مهام توزيع لعدة مستفيدين في نفس الوقت</p>
+            <h2 className="text-2xl font-bold text-gray-900">إنشاء مهام جماعية</h2>
+            <p className="text-gray-600 mt-1">إنشاء مهام توزيع لمجموعة من المستفيدين</p>
           </div>
         </div>
         <div className="flex space-x-3 space-x-reverse">
@@ -318,9 +318,6 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
             onClick={() => setShowImportModal(true)}
           >
             استيراد مستفيدين
-          </Button>
-          <Button variant="primary" icon={Download} iconPosition="right">
-            تحميل قالب
           </Button>
         </div>
       </div>
@@ -409,7 +406,6 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       <Card>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-gray-900">إضافة مستفيدين إضافيين</h3>
-          <div className="flex space-x-2 space-x-reverse">
             <Button
               variant="primary"
               icon={Upload}
@@ -420,7 +416,6 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
               استيراد من ملف
             </Button>
           </div>
-        </div>
         
         <div className="mb-4">
           <Input
