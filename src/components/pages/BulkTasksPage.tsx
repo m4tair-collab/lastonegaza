@@ -57,9 +57,14 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
   );
 
   const selectedBeneficiariesData = allBeneficiaries.filter(b => selectedBeneficiaries.includes(b.id));
-  const selectedOrganizationData = organizations.find(org => org.id === selectedOrganization);
+  const selectedOrganizationData = selectedOrganization === 'internal' 
+    ? { id: 'internal', name: 'الطرود الداخلية - المنصة', type: 'داخلي' }
+    : organizations.find(org => org.id === selectedOrganization) || 
+      mockFamilies.find(family => family.id === selectedOrganization);
   const selectedTemplateData = packageTemplates.find(t => t.id === selectedTemplate);
-  const availableTemplates = packageTemplates.filter(t => t.organization_id === selectedOrganization);
+  const availableTemplates = selectedOrganization === 'internal' 
+    ? packageTemplates.filter(t => t.organization_id === 'internal') // Internal templates
+    : packageTemplates.filter(t => t.organization_id === selectedOrganization);
 
   const handleSelectBeneficiary = (beneficiaryId: string) => {
     setSelectedBeneficiaries(prev => 
@@ -446,41 +451,223 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       {/* Organization Selection */}
       {selectedBeneficiaries.length > 0 && (
         <Card>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-gray-900">اختيار المؤسسة المانحة</h3>
-            {selectedOrganization && (
-              <div className="flex items-center space-x-2 space-x-reverse text-green-600">
-                <CheckCircle className="w-5 h-5" />
-                <span className="text-sm font-medium">تم الاختيار</span>
-              </div>
-            )}
-          </div>
+          <div className="space-y-8">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900">اختيار مصدر الطرود</h3>
+              {selectedOrganization && (
+                <div className="flex items-center space-x-2 space-x-reverse text-green-600">
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="text-sm font-medium">تم الاختيار</span>
+                </div>
+              )}
+            </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {organizations.map((organization) => (
-              <div
-                key={organization.id}
-                onClick={() => setSelectedOrganization(organization.id)}
-                className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
-                  selectedOrganization === organization.id
-                    ? 'border-blue-500 bg-blue-50 shadow-lg'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="flex items-center space-x-3 space-x-reverse mb-3">
-                  <div className="bg-blue-100 p-2 rounded-lg">
-                    <Building2 className="w-5 h-5 text-blue-600" />
+            {/* Internal Packages - Featured Section */}
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3 space-x-reverse">
+                    <div className="bg-white/20 p-3 rounded-xl">
+                      <Package className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-bold text-white">الطرود الداخلية</h4>
+                      <p className="text-green-100">طرود من المنصة مباشرة</p>
+                    </div>
+                  </div>
+                  <div className="bg-white/20 px-3 py-1 rounded-full">
+                    <span className="text-white text-sm font-medium">داخلي</span>
+                  </div>
+                </div>
+                
+                <p className="text-green-100 mb-6">
+                  طرود متوفرة من مخزون المنصة الداخلي، جاهزة للتوزيع الفوري على المستفيدين
+                </p>
+                
+                <div className="grid md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-white/10 p-3 rounded-lg">
+                    <p className="text-white text-sm">الطرود المتاحة</p>
+                    <p className="text-2xl font-bold text-white">1,247</p>
+                  </div>
+                  <div className="bg-white/10 p-3 rounded-lg">
+                    <p className="text-white text-sm">القوالب الجاهزة</p>
+                    <p className="text-2xl font-bold text-white">15</p>
+                  </div>
+                  <div className="bg-white/10 p-3 rounded-lg">
+                    <p className="text-white text-sm">متوسط التكلفة</p>
+                    <p className="text-2xl font-bold text-white">45 ₪</p>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => setSelectedOrganization('internal')}
+                  className={`w-full py-4 px-6 rounded-xl font-semibold transition-all ${
+                    selectedOrganization === 'internal'
+                      ? 'bg-white text-green-600 shadow-lg'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  {selectedOrganization === 'internal' ? (
+                    <div className="flex items-center justify-center space-x-2 space-x-reverse">
+                      <CheckCircle className="w-5 h-5" />
+                      <span>تم اختيار الطرود الداخلية</span>
+                    </div>
+                  ) : (
+                    'اختيار الطرود الداخلية'
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* External Organizations Section */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3 space-x-reverse">
+                  <div className="bg-blue-100 p-3 rounded-xl">
+                    <Building2 className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">{organization.name}</h4>
-                    <p className="text-sm text-gray-600">{organization.type}</p>
+                    <h4 className="text-lg font-bold text-gray-900">المؤسسات الخارجية</h4>
+                    <p className="text-gray-600">طرود مدعومة من مؤسسات خارجية</p>
                   </div>
                 </div>
-                <div className="text-xs text-gray-500">
-                  {organization.packagesAvailable || 0} طرد متاح • {organization.templatesCount || 0} قوالب
+                <Badge variant="info" size="sm">
+                  {organizations.length} مؤسسة
+                </Badge>
+              </div>
+
+              {/* Organizations Search */}
+              <div className="mb-6">
+                <Input
+                  type="text"
+                  icon={Search}
+                  iconPosition="right"
+                  placeholder="البحث في المؤسسات..."
+                  value={organizationSearchTerm}
+                  onChange={(e) => setOrganizationSearchTerm(e.target.value)}
+                />
+              </div>
+
+              {/* Popular Organizations */}
+              <div className="mb-6">
+                <h5 className="font-medium text-gray-900 mb-3">المؤسسات الشائعة</h5>
+                <div className="flex flex-wrap gap-2">
+                  {organizations.filter(org => org.isPopular).map((org) => (
+                    <button
+                      key={org.id}
+                      onClick={() => setSelectedOrganization(org.id)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        selectedOrganization === org.id
+                          ? 'bg-blue-600 text-white shadow-lg'
+                          : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                      }`}
+                    >
+                      {org.name}
+                    </button>
+                  ))}
                 </div>
               </div>
-            ))}
+
+              {/* Organizations Grid */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-80 overflow-y-auto">
+                {filteredOrganizations.map((organization) => (
+                  <div
+                    key={organization.id}
+                    onClick={() => setSelectedOrganization(organization.id)}
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
+                      selectedOrganization === organization.id
+                        ? 'border-blue-500 bg-blue-50 shadow-lg'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3 space-x-reverse mb-3">
+                      <div className="bg-blue-100 p-2 rounded-lg">
+                        <Building2 className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{organization.name}</h4>
+                        <p className="text-sm text-gray-600">{organization.type}</p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {organization.packagesAvailable || 0} طرد متاح • {organization.templatesCount || 0} قوالب
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Families Section */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3 space-x-reverse">
+                  <div className="bg-purple-100 p-3 rounded-xl">
+                    <Heart className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900">العائلات والمبادرات</h4>
+                    <p className="text-gray-600">طرود موزعة عبر العائلات بدعم خارجي</p>
+                  </div>
+                </div>
+                <Badge variant="info" size="sm">
+                  {mockFamilies.length} عائلة
+                </Badge>
+              </div>
+
+              {/* Families Search */}
+              <div className="mb-6">
+                <Input
+                  type="text"
+                  icon={Search}
+                  iconPosition="right"
+                  placeholder="البحث في العائلات..."
+                  value={familySearchTerm}
+                  onChange={(e) => setFamilySearchTerm(e.target.value)}
+                />
+              </div>
+
+              {/* Families Grid */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-80 overflow-y-auto">
+                {filteredFamilies.map((family) => {
+                  const supportingOrg = organizations.find(org => org.id === family.supportingOrganizationId);
+                  return (
+                    <div
+                      key={family.id}
+                      onClick={() => setSelectedOrganization(family.id)}
+                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
+                        selectedOrganization === family.id
+                          ? 'border-purple-500 bg-purple-50 shadow-lg'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3 space-x-reverse mb-3">
+                        <div className="bg-purple-100 p-2 rounded-lg">
+                          <Heart className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{family.name}</h4>
+                          <p className="text-sm text-gray-600">{family.membersCount} فرد</p>
+                        </div>
+                      </div>
+                      
+                      {supportingOrg && (
+                        <div className="bg-gray-50 p-2 rounded-lg mb-2">
+                          <p className="text-xs text-gray-600">بدعم من:</p>
+                          <p className="text-sm font-medium text-gray-800">{supportingOrg.name}</p>
+                        </div>
+                      )}
+                      
+                      <div className="text-xs text-gray-500">
+                        {family.packagesDistributed} طرد موزع • {family.completionRate}% إنجاز
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </Card>
       )}

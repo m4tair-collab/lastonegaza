@@ -491,6 +491,43 @@ export const mockOrganizations: Organization[] = [
 
 // Mock Package Templates Data
 export const mockPackageTemplates: PackageTemplate[] = [
+  // Internal Templates
+  {
+    id: uuidv4(),
+    name: 'طرد الطوارئ السريع',
+    type: 'emergency',
+    organization_id: 'internal',
+    description: 'طرد طوارئ سريع من مخزون المنصة الداخلي',
+    contents: [
+      { id: uuidv4(), name: 'مياه شرب', quantity: 6, unit: 'زجاجة', weight: 9 },
+      { id: uuidv4(), name: 'خبز', quantity: 2, unit: 'رغيف', weight: 0.5 },
+      { id: uuidv4(), name: 'تونة معلبة', quantity: 4, unit: 'علبة', weight: 0.8 },
+      { id: uuidv4(), name: 'بسكويت', quantity: 3, unit: 'علبة', weight: 0.6 }
+    ],
+    status: 'active',
+    createdAt: '2024-01-05',
+    usageCount: 89,
+    totalWeight: 10.9,
+    estimatedCost: 25
+  },
+  {
+    id: uuidv4(),
+    name: 'طرد النظافة الأساسي',
+    type: 'hygiene',
+    organization_id: 'internal',
+    description: 'طرد نظافة شخصية من المخزون الداخلي',
+    contents: [
+      { id: uuidv4(), name: 'صابون', quantity: 4, unit: 'قطعة', weight: 0.4 },
+      { id: uuidv4(), name: 'شامبو', quantity: 2, unit: 'زجاجة', weight: 0.6 },
+      { id: uuidv4(), name: 'معجون أسنان', quantity: 2, unit: 'أنبوب', weight: 0.2 },
+      { id: uuidv4(), name: 'فرشاة أسنان', quantity: 4, unit: 'قطعة', weight: 0.1 }
+    ],
+    status: 'active',
+    createdAt: '2024-01-03',
+    usageCount: 156,
+    totalWeight: 1.3,
+    estimatedCost: 15
+  },
   {
     id: uuidv4(),
     name: 'طرد رمضان كريم 2024',
@@ -569,7 +606,8 @@ export const mockFamilies: Family[] = [
     packagesDistributed: 45,
     completionRate: 93,
     location: 'خان يونس - الكتيبة',
-    createdAt: '2024-01-10'
+    createdAt: '2024-01-10',
+    supportingOrganizationId: instUnrwaId // مدعومة من الأونروا
   },
   {
     id: family2Id,
@@ -585,7 +623,8 @@ export const mockFamilies: Family[] = [
     packagesDistributed: 11,
     completionRate: 85,
     location: 'خان يونس - القرارة',
-    createdAt: '2024-02-05'
+    createdAt: '2024-02-05',
+    supportingOrganizationId: instWfpId // مدعومة من برنامج الغذاء العالمي
   },
   {
     id: family3Id,
@@ -601,7 +640,8 @@ export const mockFamilies: Family[] = [
     packagesDistributed: 1,
     completionRate: 100,
     location: 'خان يونس - الفخاري',
-    createdAt: '2024-01-25'
+    createdAt: '2024-01-25',
+    supportingOrganizationId: crsOrgId // مدعومة من CRS
   }
 ];
 
