@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Building2, FileText, DollarSign, Weight, Plus, Trash2, Save, X, AlertTriangle, CheckCircle, List, Edit } from 'lucide-react';
-import { type PackageTemplate, type PackageItem, mockFamilies } from '../data/mockData';
+import { type PackageTemplate, type PackageItem, mockOrganizations } from '../data/mockData';
 import { useErrorLogger } from '../utils/errorLogger';
 import { Button, Card, Input } from './ui';
 
@@ -14,7 +14,7 @@ interface PackageTemplateFormProps {
 interface FormData {
   name: string;
   type: 'food' | 'medical' | 'clothing' | 'hygiene' | 'emergency' | '';
-  family_id: string;
+  organization_id: string;
   description: string;
   contents: PackageItem[];
   estimatedCost: number;
@@ -27,7 +27,7 @@ export default function PackageTemplateForm({ template, onSave, onCancel, isCopy
   const [formData, setFormData] = useState<FormData>({
     name: '',
     type: '',
-    family_id: '',
+    organization_id: '',
     description: '',
     contents: [],
     estimatedCost: 0,
@@ -45,7 +45,7 @@ export default function PackageTemplateForm({ template, onSave, onCancel, isCopy
       setFormData({
         name: isCopy ? `${template.name} (نسخة)` : template.name || '',
         type: template.type || '',
-        family_id: template.family_id || '',
+        organization_id: template.organization_id || '',
         description: template.description || '',
         contents: template.contents || [],
         estimatedCost: template.estimatedCost || 0,
@@ -54,9 +54,9 @@ export default function PackageTemplateForm({ template, onSave, onCancel, isCopy
     }
   }, [template, isEditing, isCopy]);
 
-  const familyOptions = mockFamilies.map(family => ({
-    value: family.id,
-    label: family.name,
+  const organizationOptions = mockOrganizations.map(org => ({
+    value: org.id,
+    label: org.name,
   }));
 
   const packageTypes = [
@@ -115,8 +115,8 @@ export default function PackageTemplateForm({ template, onSave, onCancel, isCopy
     if (!formData.type) {
       newErrors.type = 'نوع القالب مطلوب';
     }
-    if (!formData.family_id) {
-      newErrors.family_id = 'العائلة المانحة مطلوبة';
+    if (!formData.organization_id) {
+      newErrors.organization_id = 'المؤسسة المانحة مطلوبة';
     }
     if (formData.estimatedCost <= 0) {
       newErrors.estimatedCost = 'التكلفة المقدرة يجب أن تكون أكبر من صفر';
@@ -240,22 +240,22 @@ export default function PackageTemplateForm({ template, onSave, onCancel, isCopy
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                العائلة المانحة *
+                المؤسسة المانحة *
               </label>
               <select
-                value={formData.family_id}
-                onChange={(e) => handleInputChange('family_id', e.target.value)}
+                value={formData.organization_id}
+                onChange={(e) => handleInputChange('organization_id', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               >
-                <option value="">اختر العائلة</option>
-                {familyOptions.map(family => (
-                  <option key={family.value} value={family.value}>{family.label}</option>
+                <option value="">اختر المؤسسة</option>
+                {organizationOptions.map(org => (
+                  <option key={org.value} value={org.value}>{org.label}</option>
                 ))}
               </select>
-              {errors.family_id && (
+              {errors.organization_id && (
                 <p className="text-red-600 text-sm mt-1 flex items-center">
                   <AlertTriangle className="w-4 h-4 ml-1" />
-                  {errors.family_id}
+                  {errors.organization_id}
                 </p>
               )}
             </div>

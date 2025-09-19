@@ -115,6 +115,38 @@ export default function LandingPage({ onNavigateTo }: LandingPageProps) {
               </button>
             </div>
 
+            {/* Organizations Dashboard */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6 hover:border-green-300 transition-colors">
+              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-4">
+                <Building2 className="w-6 h-6 text-green-600" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-3">لوحة المؤسسات</h4>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                إدارة مستفيدين وطرود المؤسسة، متابعة عملية التوزيع، 
+                والحصول على تقارير أداء مفصلة
+              </p>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-center text-sm text-gray-600">
+                  <div className="w-1.5 h-1.5 bg-green-600 rounded-full ml-2 flex-shrink-0"></div>
+                  إدارة المستفيدين والطرود
+                </li>
+                <li className="flex items-center text-sm text-gray-600">
+                  <div className="w-1.5 h-1.5 bg-green-600 rounded-full ml-2 flex-shrink-0"></div>
+                  متابعة المهام والمندوبين
+                </li>
+                <li className="flex items-center text-sm text-gray-600">
+                  <div className="w-1.5 h-1.5 bg-green-600 rounded-full ml-2 flex-shrink-0"></div>
+                  تقارير أداء المؤسسة
+                </li>
+              </ul>
+              <button 
+                onClick={() => onNavigateTo('organizations')}
+                className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
+              >
+                <span>دخول لوحة المؤسسات</span>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+              </button>
+            </div>
 
             {/* Families Dashboard */}
             <div className="bg-white border border-gray-200 rounded-xl p-6 hover:border-purple-300 transition-colors">

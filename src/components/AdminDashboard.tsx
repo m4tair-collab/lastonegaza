@@ -7,7 +7,7 @@ import { useErrorLogger } from '../utils/errorLogger';
 import { statisticsService, alertsService } from '../services/supabaseService';
 import { Shield, Users, Package, Truck, Bell, BarChart3, Settings, MapPin, Calendar, FileText, AlertTriangle, CheckCircle, Clock, Plus, Search, Filter, Download, Eye, Edit, Phone, Star, UserPlus, Building2, Heart, TrendingUp, Activity, Database, MessageSquare, UserCheck, Crown, Key, Lock, ChevronRight, RefreshCw, LogOut } from 'lucide-react';
 import { Send } from 'lucide-react';
-import { mockBeneficiaries, mockPackages, calculateStats, mockFamilies } from '../data/mockData';
+import { mockBeneficiaries, mockPackages, calculateStats, mockOrganizations, mockFamilies } from '../data/mockData';
 import PermissionsManagement from './PermissionsManagement';
 import { Button, Card, StatCard, Badge } from './ui';
 
@@ -508,7 +508,7 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
             </div>
           </div>
           <OrganizationsListPage 
-            highlightOrganizationId={undefined}
+            highlightOrganizationId={loggedInUser?.associatedType === 'organization' ? loggedInUser.associatedId : undefined}
           />
         </div>
       );
