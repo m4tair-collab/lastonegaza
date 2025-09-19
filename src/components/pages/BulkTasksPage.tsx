@@ -273,31 +273,9 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4 space-x-reverse">
-          {onNavigateBack && (
-            <Button
-              variant="secondary"
-              icon={ArrowLeft}
-              iconPosition="right"
-              onClick={onNavigateBack}
-            >
-              العودة للقائمة
-            </Button>
-          )}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">إنشاء مهام جماعية</h2>
-            <p className="text-gray-600 mt-1">إنشاء مهام توزيع لمجموعة من المستفيدين</p>
-          </div>
-        </div>
-        <div className="flex space-x-3 space-x-reverse">
-          <Button
-            variant="secondary"
-            icon={Upload}
-            iconPosition="right"
-            onClick={() => setShowImportModal(true)}
-          >
-            استيراد مستفيدين
-          </Button>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">إنشاء مهام جماعية</h2>
+          <p className="text-gray-600 mt-1">إنشاء مهام توزيع لمجموعة من المستفيدين</p>
         </div>
       </div>
 
@@ -385,26 +363,6 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       <Card>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-gray-900">إضافة مستفيدين إضافيين</h3>
-          <div className="flex space-x-2 space-x-reverse">
-            <Button
-              variant="secondary"
-              icon={Download}
-              iconPosition="right"
-              size="sm"
-              onClick={downloadCSVTemplate}
-            >
-              تحميل قالب CSV
-            </Button>
-            <Button
-              variant="primary"
-              icon={Upload}
-              iconPosition="right"
-              size="sm"
-              onClick={() => setShowImportModal(true)}
-            >
-              استيراد من ملف
-            </Button>
-          </div>
         </div>
         
         <div className="mb-4">
