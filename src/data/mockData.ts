@@ -486,6 +486,23 @@ export const mockOrganizations: Organization[] = [
     packagesAvailable: 500,
     templatesCount: 3,
     isPopular: true
+  },
+  {
+    id: uuidv4(),
+    name: 'طرود داخلية - من المنصة',
+    type: 'طرود داخلية',
+    location: 'المنصة - مخزون داخلي',
+    contactPerson: 'إدارة المنصة',
+    phone: '+970591111111',
+    email: 'internal@platform.ps',
+    beneficiariesCount: 0,
+    packagesCount: 0,
+    completionRate: 100,
+    status: 'active',
+    createdAt: '2024-01-01',
+    packagesAvailable: 1000,
+    templatesCount: 10,
+    isPopular: true
   }
 ];
 
