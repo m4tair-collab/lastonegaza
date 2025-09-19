@@ -116,7 +116,7 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
     return {
       beneficiaryName: selectedBeneficiary?.name,
       templateName: templateInfo?.name,
-      institutionName: families.find(inst => inst.id === templateInfo?.family_id)?.name || 'غير محدد',
+      familyName: families.find(f => f.id === templateInfo?.family_id)?.name || 'غير محدد',
       reasonName: reasonInfo?.name,
       priorityText: priority === 'high' ? 'عالية' : priority === 'low' ? 'منخفضة' : 'عادية',
       estimatedCost: templateInfo?.estimatedCost,
@@ -691,7 +691,7 @@ export default function IndividualSendPage({ beneficiaryIdToPreselect, onBenefic
               </div>
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-600">المؤسسة:</span>
-                <span className="font-medium text-gray-900">{getConfirmMessageDetails().institutionName}</span>
+                <span className="font-medium text-gray-900">{getConfirmMessageDetails().familyName}</span>
               </div>
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-600">السبب:</span>
