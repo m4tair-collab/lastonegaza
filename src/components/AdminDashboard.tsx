@@ -89,22 +89,22 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
       icon: Users,
       children: [
         { id: 'beneficiaries-list', name: 'قائمة المستفيدين', icon: Users },
+        { id: 'bulk-tasks', name: 'المهام الجماعية', icon: Send },
         { id: 'status-management', name: 'إدارة الحالات', icon: UserCheck },
         { id: 'delayed', name: 'المتأخرين', icon: Clock },
         { id: 'activity-log', name: 'سجل النشاط', icon: Activity }
       ]
     },
-    { // Renamed 'packages' to 'shipments'
-      id: 'shipments',
-      name: 'إدارة الإرسالات',
-      icon: Truck, // Changed icon from Package to Truck
+    {
+      id: 'packages',
+      name: 'إدارة الطرود',
+      icon: Package,
       children: [
-        { id: 'packages-list', name: 'قوالب الطرود', icon: Package }, // Still refers to package templates
-        { id: 'bulk-send', name: 'إرسال جماعي', icon: Users }, // Moved from beneficiaries
-        { id: 'bulk-tasks', name: 'المهام الجماعية', icon: Send }, // Moved from beneficiaries
-        { id: 'individual-send', name: 'إرسال فردي', icon: UserPlus }, // Moved from beneficiaries
-        { id: 'tracking', name: 'تتبع الإرسالات', icon: Truck }, // Still refers to tracking
-        { id: 'distribution-reports', name: 'تقارير التوزيع', icon: BarChart3 } // Still refers to reports
+        { id: 'packages-list', name: 'قوالب الطرود', icon: Package },
+        { id: 'bulk-send', name: 'إرسال جماعي', icon: Users },
+        { id: 'individual-send', name: 'إرسال فردي', icon: UserPlus },
+        { id: 'tracking', name: 'تتبع الإرسالات', icon: Truck },
+        { id: 'distribution-reports', name: 'تقارير التوزيع', icon: BarChart3 }
       ]
     },
     {
@@ -404,7 +404,7 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
       );
     }
 
-    // Shipments pages (formerly Package pages)
+    // Package pages
     if (activeTab === 'packages-list') {
       return (
         <div className="space-y-6">
@@ -424,7 +424,6 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
       );
     }
 
-    // Bulk Send Page (moved from Beneficiaries)
     if (activeTab === 'bulk-send') {
       return (
         <div className="space-y-6">
@@ -442,7 +441,6 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
       );
     }
 
-    // Individual Send Page (moved from Beneficiaries)
     if (activeTab === 'individual-send') {
       return (
         <div className="space-y-6">
