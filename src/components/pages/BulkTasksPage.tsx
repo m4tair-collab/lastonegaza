@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Package, Users, Send, CheckCircle, AlertTriangle, Clock, Building2, Search, Filter, Plus, Eye, Edit, X, ArrowLeft, Calendar, MapPin, Phone, FileText, Star, TrendingUp, Upload, Download, RefreshCw, UserPlus, Trash2 } from 'lucide-react';
-import { 
+import { mockBeneficiaries, mockPackages, calculateStats, mockOrganizations, mockFamilies, mockPackageTemplates, addOrUpdateBeneficiaryFromImport, validateImportedBeneficiary, generateBeneficiariesCSVTemplate } from '../../data/mockData';
   mockBeneficiaries, 
   mockOrganizations, 
   mockPackageTemplates,
