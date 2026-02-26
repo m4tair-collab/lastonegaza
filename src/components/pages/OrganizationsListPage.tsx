@@ -136,14 +136,6 @@ export default function OrganizationsListPage({ loggedInUser, highlightOrganizat
 
   return (
     <div className="space-y-6">
-      {/* Data Source Indicator */}
-      <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
-        <div className="flex items-center space-x-2 space-x-reverse text-blue-600">
-          <CheckCircle className="w-4 h-4" />
-          <span className="text-sm font-medium">البيانات الوهمية محملة ({organizations.length} مؤسسة)</span>
-        </div>
-      </div>
-
       {/* Actions Bar */}
       <div className="flex items-center justify-between">
         <div className="flex space-x-3 space-x-reverse">
@@ -248,13 +240,7 @@ export default function OrganizationsListPage({ loggedInUser, highlightOrganizat
       {/* Organizations Table */}
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">قائمة المؤسسات ({filteredOrganizations.length})</h3>
-            <div className="flex items-center space-x-2 space-x-reverse text-blue-600">
-              <CheckCircle className="w-4 h-4" />
-              <span className="text-sm">البيانات الوهمية</span>
-            </div>
-          </div>
+          <h3 className="text-lg font-semibold text-gray-900">قائمة المؤسسات ({filteredOrganizations.length})</h3>
         </div>
         
         <div className="overflow-x-auto">

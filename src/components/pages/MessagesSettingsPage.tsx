@@ -537,16 +537,6 @@ export default function MessagesSettingsPage() {
         </div>
       )}
 
-      {/* Data Source Indicator */}
-      <Card className="bg-blue-50 border-blue-200" padding="sm">
-        <div className="flex items-center space-x-2 space-x-reverse text-blue-600">
-          <CheckCircle className="w-4 h-4" />
-          <span className="text-sm font-medium">
-            البيانات الوهمية محملة - {messageTemplates.length} قالب، {messageLogs.length} رسالة مرسلة
-          </span>
-        </div>
-      </Card>
-
       {/* Tabs */}
       <Card>
         <div className="flex space-x-1 space-x-reverse">

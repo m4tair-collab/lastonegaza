@@ -192,16 +192,6 @@ export default function PackageListPage({ loggedInUser }: PackageListPageProps) 
 
   return (
     <div className="space-y-6">
-      {/* Data Source Indicator */}
-      <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
-        <div className="flex items-center space-x-2 space-x-reverse text-blue-600">
-          <CheckCircle className="w-4 h-4" />
-          <span className="text-sm font-medium">
-            البيانات الوهمية محملة - {templates.length} قالب من {availableInstitutions.length} مؤسسة
-          </span>
-        </div>
-      </div>
-
       {/* Actions Bar */}
       <div className="flex items-center justify-between">
         <div className="flex space-x-3 space-x-reverse">

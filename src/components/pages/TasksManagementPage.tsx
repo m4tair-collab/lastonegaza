@@ -342,16 +342,6 @@ export default function TasksManagementPage() {
         </div>
       )}
 
-      {/* Data Source Indicator */}
-      <Card className="bg-blue-50 border-blue-200" padding="sm">
-        <div className="flex items-center space-x-2 space-x-reverse text-blue-600">
-          <CheckCircle className="w-4 h-4" />
-          <span className="text-sm font-medium">
-            البيانات الوهمية محملة - {tasks.length} مهمة، {couriers.length} مندوب
-          </span>
-        </div>
-      </Card>
-
       {/* Actions Bar */}
       <div className="flex items-center justify-between">
         <div className="flex space-x-3 space-x-reverse">
@@ -490,13 +480,7 @@ export default function TasksManagementPage() {
       {/* Tasks Table */}
       <Card padding="none" className="overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">قائمة المهام ({filteredTasks.length})</h3>
-            <div className="flex items-center space-x-2 space-x-reverse text-blue-600">
-              <CheckCircle className="w-4 h-4" />
-              <span className="text-sm">البيانات الوهمية</span>
-            </div>
-          </div>
+          <h3 className="text-lg font-semibold text-gray-900">قائمة المهام ({filteredTasks.length})</h3>
         </div>
         
         <div className="overflow-x-auto">
