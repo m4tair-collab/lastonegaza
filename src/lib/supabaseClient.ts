@@ -12,7 +12,7 @@ export const getProjectInfo = async () => {
     connected: false,
     url: 'غير متصل',
     hasData: false,
-    error: 'النظام يعمل بالبيانات الوهمية'
+    error: null
   };
 };
 

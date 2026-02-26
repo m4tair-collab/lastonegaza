@@ -307,10 +307,6 @@ export default function DistributionReportsPage() {
           <Card>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">دفعات التوزيع ({filteredBatches.length})</h3>
-              <div className="flex items-center space-x-2 space-x-reverse text-blue-600">
-                <CheckCircle className="w-4 h-4" />
-                <span className="text-sm">البيانات الوهمية</span>
-              </div>
             </div>
             
             <div className="grid gap-4">

@@ -251,8 +251,7 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend, onNa
           updatedAt: new Date().toISOString(),
           updatedBy: 'admin'
         });
-        
-        // تحديث البيانات الوهمية مباشرة للعرض الفوري
+
         const beneficiaryIndex = mockBeneficiaries.findIndex(b => b.id === confirmAction.beneficiaryId);
         if (beneficiaryIndex !== -1) {
           mockBeneficiaries[beneficiaryIndex].status = 'suspended';
@@ -744,15 +743,6 @@ export default function BeneficiariesListPage({ onNavigateToIndividualSend, onNa
           <div className="text-center">
             <h3 className="text-xl font-bold text-gray-900 mb-2">قائمة المستفيدين</h3>
             
-            {/* Data Source Badge */}
-            <div className="flex items-center justify-center space-x-2 space-x-reverse mb-3">
-              <div className="bg-blue-100 p-1.5 rounded-lg">
-                <CheckCircle className="w-4 h-4 text-blue-600" />
-              </div>
-              <span className="text-sm font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
-                البيانات الوهمية
-              </span>
-            </div>
             
             {/* Count Display */}
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm inline-block">

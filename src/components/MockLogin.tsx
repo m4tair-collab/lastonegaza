@@ -59,10 +59,8 @@ export default function MockLogin({ onLogin }: MockLoginProps) {
     setIsLoading(true);
     setError('');
 
-    // محاكاة تأخير الشبكة
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // البحث عن المستخدم في البيانات الوهمية
     const user = mockSystemUsers.find(u => u.email.toLowerCase() === emailToUse.toLowerCase());
 
     if (user) {

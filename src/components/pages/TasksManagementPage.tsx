@@ -22,7 +22,6 @@ export default function TasksManagementPage() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
 
-  // استخدام البيانات الوهمية مباشرة
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const beneficiaries = mockBeneficiaries;
   const packages = mockPackages;

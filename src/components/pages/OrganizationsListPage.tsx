@@ -16,7 +16,6 @@ export default function OrganizationsListPage({ loggedInUser, highlightOrganizat
   const [modalType, setModalType] = useState<'add' | 'edit' | 'view'>('add');
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
 
-  // استخدام البيانات الوهمية مباشرة
   const organizations = mockOrganizations;
   const loading = false;
   const error = null;

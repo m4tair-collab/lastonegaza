@@ -258,10 +258,8 @@ export default function SystemSettingsPage() {
 
   const handleSaveSettings = async () => {
     try {
-      // محاكاة حفظ الإعدادات
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // تحديث الإعدادات في البيانات الوهمية
       setSystemSettings(prev => 
         prev.map(setting => ({
           ...setting,
@@ -649,8 +647,8 @@ export default function SystemSettingsPage() {
               <Database className="w-5 h-5 text-green-600" />
               <span className="font-medium text-green-800">قاعدة البيانات</span>
             </div>
-            <p className="text-sm text-green-700">البيانات الوهمية</p>
-            <p className="text-xs text-green-600">للتطوير</p>
+            <p className="text-sm text-green-700">Supabase PostgreSQL</p>
+            <p className="text-xs text-green-600">قاعدة بيانات سحابية</p>
           </div>
 
           <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">

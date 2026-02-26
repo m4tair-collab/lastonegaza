@@ -20,15 +20,10 @@ export default function PackageListPage({ loggedInUser }: PackageListPageProps) 
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [templatesError, setTemplatesError] = useState<Error | null>(null);
 
-  // استخدام البيانات الوهمية مباشرة
-  // For simplicity, we'll use a mutable copy of mock data for local changes
   const [templates, setTemplates] = useState<PackageTemplate[]>(mockPackageTemplates);
   const availableInstitutions = mockOrganizations;
   const loading = false;
   const refetchTemplates = () => {
-    console.log('تحديث البيانات الوهمية');
-    // In a real app, this would fetch from a backend.
-    // For mock data, we just re-set the state to trigger re-render if mock data was modified.
     setTemplates([...mockPackageTemplates]);
   };
 

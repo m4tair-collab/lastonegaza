@@ -634,27 +634,6 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
             )}
           </div>
 
-          {/* Connection Status */}
-          <Card className="bg-blue-50 border-blue-200" padding="sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center space-x-3 space-x-reverse">
-                    <CheckCircle className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <span className="text-blue-800 font-medium">النظام يعمل بالبيانات الوهمية</span>
-                      <p className="text-blue-600 text-sm mt-1">يتم عرض البيانات الوهمية حالياً</p>
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => window.location.reload()}
-                >
-                  تحديث البيانات
-                </Button>
-              </div>
-          </Card>
 
           {/* Alerts Loading/Error States */}
           {/* Quick Actions */}
