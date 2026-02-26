@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { X, User, Phone, MapPin, Calendar, Package, Clock, Edit, FileText, Eye, Camera, Download, CheckCircle, AlertTriangle, Heart, Briefcase, Home, Users, Star, Activity, Truck, Bell, MessageSquare, Shield, Crown } from 'lucide-react';
 import { type Beneficiary, mockPackages, mockTasks, mockActivityLog, beneficiaries } from '../data/mockData'; // Removed Shield, added Star
 import { Button, Card, Badge, Modal } from './ui';
-import { useErrorLogger } from '../utils/errorLogger';
 
 interface BeneficiaryProfileModalProps {
   beneficiary: Beneficiary;
@@ -23,7 +22,6 @@ export default function BeneficiaryProfileModal({
   onRequestReupload,
   onSuspendBeneficiary
 }: BeneficiaryProfileModalProps) {
-  const { logInfo } = useErrorLogger();
   const [showFullImageModal, setShowFullImageModal] = useState(false);
   const [showDocumentsModal, setShowDocumentsModal] = useState(false);
   const [showPackageDetailsModal, setShowPackageDetailsModal] = useState(false);
@@ -38,7 +36,6 @@ export default function BeneficiaryProfileModal({
     switch (action) {
       case 'view-documents':
         setShowDocumentsModal(true);
-        logInfo(`عرض المستندات للمستفيد: ${beneficiary.name}`, 'BeneficiaryProfileModal');
         break;
       case 'approve-identity':
         if (onApproveIdentity) {
@@ -51,11 +48,9 @@ export default function BeneficiaryProfileModal({
         }
         break;
       case 'track-courier':
-        logInfo(`تتبع المندوب للمستفيد: ${beneficiary.name}`, 'BeneficiaryProfileModal');
         alert('سيتم فتح شاشة تتبع المندوب المسؤول عن هذا المستفيد');
         break;
       case 'export-activity':
-        logInfo(`تصدير نشاط المستفيد: ${beneficiary.name}`, 'BeneficiaryProfileModal');
         const activityData = {
           beneficiary: beneficiary.name,
           nationalId: beneficiary.nationalId,
@@ -75,12 +70,10 @@ export default function BeneficiaryProfileModal({
         break;
       case 'suspend':
         if (confirm(`هل أنت متأكد من تعليق حساب ${beneficiary.name}؟`)) {
-          logInfo(`تعليق حساب المستفيد: ${beneficiary.name}`, 'BeneficiaryProfileModal');
           alert('تم تعليق الحساب بنجاح');
         }
         break;
       default:
-        logInfo(`إجراء غير معروف: ${action}`, 'BeneficiaryProfileModal');
     }
   };
 

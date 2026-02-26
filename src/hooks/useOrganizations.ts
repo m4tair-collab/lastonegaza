@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { type Organization, mockOrganizations } from '../data/mockData';
-import { useErrorLogger } from '../utils/errorLogger';
 
 interface UseOrganizationsOptions {
   searchTerm?: string;
@@ -12,7 +11,6 @@ export const useOrganizations = (options: UseOrganizationsOptions = {}) => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { logInfo, logError } = useErrorLogger();
 
   // جلب البيانات
   useEffect(() => {
@@ -20,23 +18,21 @@ export const useOrganizations = (options: UseOrganizationsOptions = {}) => {
       try {
         setLoading(true);
         setError(null);
-        
+
         // محاكاة تأخير الشبكة
         await new Promise(resolve => setTimeout(resolve, 200));
-        
+
         setOrganizations([...mockOrganizations]);
-        logInfo(`تم تحميل ${mockOrganizations.length} مؤسسة`, 'useOrganizations');
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'خطأ في تحميل المؤسسات';
         setError(errorMessage);
-        logError(new Error(errorMessage), 'useOrganizations');
       } finally {
         setLoading(false);
       }
     };
 
     fetchOrganizations();
-  }, [logInfo, logError]);
+  }, []);
 
   // فلترة البيانات
   const filteredOrganizations = useMemo(() => {
@@ -101,12 +97,10 @@ export const useOrganizations = (options: UseOrganizationsOptions = {}) => {
       };
 
       setOrganizations(prev => [newOrganization, ...prev]);
-      logInfo(`تم إضافة مؤسسة جديدة: ${newOrganization.name}`, 'useOrganizations');
       return newOrganization;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'خطأ في إضافة المؤسسة';
       setError(errorMessage);
-      logError(new Error(errorMessage), 'useOrganizations');
       throw err;
     } finally {
       setLoading(false);
@@ -117,19 +111,16 @@ export const useOrganizations = (options: UseOrganizationsOptions = {}) => {
     try {
       setLoading(true);
       
-      setOrganizations(prev => 
-        prev.map(org => 
-          org.id === id 
+      setOrganizations(prev =>
+        prev.map(org =>
+          org.id === id
             ? { ...org, ...updates }
             : org
         )
       );
-      
-      logInfo(`تم تحديث المؤسسة: ${id}`, 'useOrganizations');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'خطأ في تحديث المؤسسة';
       setError(errorMessage);
-      logError(new Error(errorMessage), 'useOrganizations');
       throw err;
     } finally {
       setLoading(false);
@@ -141,11 +132,9 @@ export const useOrganizations = (options: UseOrganizationsOptions = {}) => {
       setLoading(true);
       
       setOrganizations(prev => prev.filter(org => org.id !== id));
-      logInfo(`تم حذف المؤسسة: ${id}`, 'useOrganizations');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'خطأ في حذف المؤسسة';
       setError(errorMessage);
-      logError(new Error(errorMessage), 'useOrganizations');
       throw err;
     } finally {
       setLoading(false);

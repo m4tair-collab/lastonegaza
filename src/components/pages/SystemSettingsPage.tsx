@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Settings, Shield, Database, Bell, Globe, Clock, Save, RefreshCw, AlertTriangle, CheckCircle, Lock, Unlock, Eye, EyeOff, Download, Upload, Trash2, Plus, Edit, X, Key, Server, Monitor, Wifi, HardDrive, Activity, Users, Package, Truck, BarChart3, Mail, Phone, MessageSquare } from 'lucide-react';
-import { useErrorLogger } from '../../utils/errorLogger';
 import { Button, Card, Input, Badge, Modal } from '../ui';
 
 interface SystemSetting {
@@ -18,7 +17,6 @@ interface SystemSetting {
 }
 
 export default function SystemSettingsPage() {
-  const { logInfo, logError } = useErrorLogger();
   const [activeCategory, setActiveCategory] = useState('general');
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -277,11 +275,9 @@ export default function SystemSettingsPage() {
       setHasUnsavedChanges(false);
       setNotification({ message: 'تم حفظ الإعدادات بنجاح', type: 'success' });
       setTimeout(() => setNotification(null), 3000);
-      logInfo('تم حفظ إعدادات النظام', 'SystemSettingsPage');
     } catch (error) {
       setNotification({ message: 'حدث خطأ في حفظ الإعدادات', type: 'error' });
       setTimeout(() => setNotification(null), 3000);
-      logError(error as Error, 'SystemSettingsPage');
     }
   };
 

@@ -8,14 +8,11 @@ import LandingPage from './components/LandingPage';
 import AdminDashboard from './components/AdminDashboard';
 import OrganizationsDashboard from './components/OrganizationsDashboard';
 import FamiliesDashboard from './components/FamiliesDashboard';
-import { ErrorConsole } from './components/ErrorConsole';
-import { Bug } from 'lucide-react';
 
 type PageType = 'landing' | 'admin' | 'organizations' | 'families';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<PageType>('landing');
-  const [showErrorConsole, setShowErrorConsole] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
   const handleNavigateTo = (page: string) => {
@@ -32,14 +29,12 @@ function App() {
     <AuthProvider>
       <AlertsProvider>
         <ErrorBoundary componentName="App">
-          <AppContent 
+          <AppContent
             currentPage={currentPage}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             handleNavigateTo={handleNavigateTo}
             handleNavigateBack={handleNavigateBack}
-            showErrorConsole={showErrorConsole}
-            setShowErrorConsole={setShowErrorConsole}
           />
         </ErrorBoundary>
       </AlertsProvider>
@@ -53,18 +48,14 @@ interface AppContentProps {
   setActiveTab: (tab: string) => void;
   handleNavigateTo: (page: string) => void;
   handleNavigateBack: () => void;
-  showErrorConsole: boolean;
-  setShowErrorConsole: (show: boolean) => void;
 }
 
-function AppContent({ 
-  currentPage, 
-  activeTab, 
-  setActiveTab, 
-  handleNavigateTo, 
-  handleNavigateBack,
-  showErrorConsole,
-  setShowErrorConsole 
+function AppContent({
+  currentPage,
+  activeTab,
+  setActiveTab,
+  handleNavigateTo,
+  handleNavigateBack
 }: AppContentProps) {
   const { loggedInUser, login, logout } = useAuth();
 
@@ -120,23 +111,6 @@ function AppContent({
         <ErrorBoundary componentName="FamiliesDashboard">
           <FamiliesDashboard onNavigateBack={handleNavigateBack} />
         </ErrorBoundary>
-      )}
-      
-      {process.env.NODE_ENV === 'development' && (
-        <>
-          <button
-            onClick={() => setShowErrorConsole(true)}
-            className="fixed bottom-4 left-4 bg-red-600 text-white p-3 rounded-full border border-red-700 hover:bg-red-700 transition-colors z-40"
-            title="فتح وحدة تحكم الأخطاء"
-          >
-            <Bug className="w-4 h-4" />
-          </button>
-          
-          <ErrorConsole 
-            isOpen={showErrorConsole} 
-            onClose={() => setShowErrorConsole(false)} 
-          />
-        </>
       )}
 
       {loggedInUser && currentPage !== 'landing' && (

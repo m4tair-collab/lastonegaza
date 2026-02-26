@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Building2, FileText, DollarSign, Weight, Plus, Trash2, Save, X, AlertTriangle, CheckCircle, List, Edit } from 'lucide-react';
 import { type PackageTemplate, type PackageItem, mockOrganizations } from '../data/mockData';
-import { useErrorLogger } from '../utils/errorLogger';
 import { Button, Card, Input } from './ui';
 
 interface PackageTemplateFormProps {
@@ -22,7 +21,6 @@ interface FormData {
 }
 
 export default function PackageTemplateForm({ template, onSave, onCancel, isCopy = false }: PackageTemplateFormProps) {
-  const { logError, logInfo } = useErrorLogger();
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -148,7 +146,6 @@ export default function PackageTemplateForm({ template, onSave, onCancel, isCopy
     e.preventDefault();
 
     if (!validateForm()) {
-      logError(new Error('فشل في التحقق من صحة البيانات'), 'PackageTemplateForm');
       return;
     }
 
@@ -159,11 +156,9 @@ export default function PackageTemplateForm({ template, onSave, onCancel, isCopy
       await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
 
       onSave(formData);
-      logInfo(`تم محاكاة حفظ قالب الطرد: ${formData.name}`, 'PackageTemplateForm');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
       setOperationError(errorMessage);
-      logError(new Error(errorMessage), 'PackageTemplateForm');
     } finally {
       setIsSubmitting(false);
     }

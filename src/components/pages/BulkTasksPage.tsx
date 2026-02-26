@@ -15,7 +15,6 @@ import {
   type PackageTemplate
 } from '../../data/mockData';
 import { Button, Card, Input, Badge, Modal } from '../ui';
-import { useErrorLogger } from '../../utils/errorLogger';
 
 interface BulkTasksPageProps {
   preselectedBeneficiaryIds?: string[];
@@ -23,7 +22,6 @@ interface BulkTasksPageProps {
 }
 
 export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNavigateBack }: BulkTasksPageProps) {
-  const { logInfo, logError } = useErrorLogger();
   const [selectedBeneficiaries, setSelectedBeneficiaries] = useState<string[]>(preselectedBeneficiaryIds);
   const [selectedOrganization, setSelectedOrganization] = useState<string>('');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
@@ -111,13 +109,9 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
   const executeCreateTasks = () => {
     const taskId = `TASK-${Date.now()}`;
     const packageInfo = selectedTemplateData ? selectedTemplateData.name : `طرد برقم: ${packageCode}`;
-    
-    // محاكاة إنشاء المهام
-    logInfo(`تم إنشاء ${selectedBeneficiaries.length} مهمة جديدة`, 'BulkTasksPage');
-    
+
     alert(`تم إنشاء المهام بنجاح!\n\nرقم المهمة: ${taskId}\nعدد المستفيدين: ${selectedBeneficiaries.length}\nالطرد: ${packageInfo}\nالمؤسسة: ${selectedOrganizationData?.name}\n\nسيتم إشعار المندوبين قريباً`);
-    
-    // Reset form
+
     setSelectedBeneficiaries([]);
     setSelectedOrganization('');
     setSelectedTemplate('');
@@ -209,18 +203,14 @@ export default function BulkTasksPage({ preselectedBeneficiaryIds = [], onNaviga
       const newSelectedIds = results.importedBeneficiaries.map(b => b.id);
       setSelectedBeneficiaries(prev => [...prev, ...newSelectedIds]);
 
-      // إشعار النجاح
       setNotification({
         message: `تم استيراد ${results.imported} مستفيد جديد وتحديث ${results.updated} مستفيد موجود`,
         type: 'success'
       });
       setTimeout(() => setNotification(null), 5000);
-
-      logInfo(`تم استيراد ${results.imported + results.updated} مستفيد من ملف: ${importFile.name}`, 'BulkTasksPage');
     } catch (error) {
       setNotification({ message: 'حدث خطأ في استيراد الملف', type: 'error' });
       setTimeout(() => setNotification(null), 3000);
-      logError(error as Error, 'BulkTasksPage');
     } finally {
       setIsImporting(false);
     }

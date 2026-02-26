@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, Save, X, AlertTriangle, CheckCircle, MapPin, Phone, Mail, User, Activity } from 'lucide-react';
 import { type Organization } from '../data/mockData';
-import { useErrorLogger } from '../utils/errorLogger';
 import { Button, Card, Input } from './ui';
 
 interface OrganizationFormProps {
@@ -21,7 +20,6 @@ interface FormData {
 }
 
 export default function OrganizationForm({ organization, onSave, onCancel }: OrganizationFormProps) {
-  const { logError, logInfo } = useErrorLogger();
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -111,7 +109,6 @@ export default function OrganizationForm({ organization, onSave, onCancel }: Org
     e.preventDefault();
 
     if (!validateForm()) {
-      logError(new Error('فشل في التحقق من صحة البيانات'), 'OrganizationForm');
       return;
     }
 
@@ -132,11 +129,9 @@ export default function OrganizationForm({ organization, onSave, onCancel }: Org
       await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
 
       onSave(dataToSave);
-      logInfo('تم محاكاة حفظ بيانات المؤسسة: ' + formData.name, 'OrganizationForm');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
       setOperationError(errorMessage);
-      logError(new Error(errorMessage), 'OrganizationForm');
     } finally {
       setIsSubmitting(false);
     }

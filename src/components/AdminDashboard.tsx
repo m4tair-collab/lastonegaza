@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useAuth } from '../context/AuthContext';
 import { useAlerts } from '../context/AlertsContext';
-import { useErrorLogger } from '../utils/errorLogger';
 import { statisticsService, alertsService } from '../services/supabaseService';
 import { Shield, Users, Package, Truck, Bell, BarChart3, Settings, MapPin, Calendar, FileText, AlertTriangle, CheckCircle, Clock, Plus, Search, Filter, Download, Eye, Edit, Phone, Star, UserPlus, Building2, Heart, TrendingUp, Activity, Database, MessageSquare, UserCheck, Crown, Key, Lock, ChevronRight, RefreshCw, LogOut } from 'lucide-react';
 import { Send } from 'lucide-react';
@@ -21,7 +20,6 @@ import PackageListPage from './pages/PackageListPage';
 import TrackingPage from './pages/TrackingPage';
 import DistributionReportsPage from './pages/DistributionReportsPage';
 import OrganizationsListPage from './pages/OrganizationsListPage';
-import TestSupabasePage from './pages/TestSupabasePage';
 import TasksManagementPage from './pages/TasksManagementPage';
 import ComprehensiveReportsPage from './pages/ComprehensiveReportsPage';
 import SystemSettingsPage from './pages/SystemSettingsPage';
@@ -44,12 +42,11 @@ interface AdminDashboardProps {
 export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboardProps) {
   const { loggedInUser, logout } = useAuth();
   const { alerts, criticalAlerts, unreadAlerts } = useAlerts();
-  const { logInfo, logError } = useErrorLogger();
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'add' | 'edit' | 'view'>('add');
   const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [openMenus, setOpenMenus] = useState<string[]>(['beneficiaries', 'packages', 'organizations-families', 'distribution', 'reports-alerts', 'settings', 'development']);
+  const [openMenus, setOpenMenus] = useState<string[]>(['beneficiaries', 'packages', 'organizations-families', 'distribution', 'reports-alerts', 'settings']);
   const [beneficiaryIdForIndividualSend, setBeneficiaryIdForIndividualSend] = useState<string | null>(null);
   const [beneficiaryIdsForTasks, setBeneficiaryIdsForTasks] = useState<string[]>([]);
 
@@ -61,8 +58,7 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
   // Fetch data from Supabase
   useEffect(() => {
     setStats(calculateStats());
-    logInfo('تم تحميل البيانات الوهمية بنجاح', 'AdminDashboard');
-  }, [logInfo]);
+  }, []);
 
   const handleNavigateToIndividualSend = (beneficiaryId: string) => {
     setBeneficiaryIdForIndividualSend(beneficiaryId);
@@ -141,14 +137,6 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
         { id: 'backup', name: 'النسخ الاحتياطي', icon: Database },
         { id: 'audit', name: 'سجل المراجعة', icon: Activity }
       ]
-    },
-    {
-      id: 'development',
-      name: 'أدوات التطوير',
-      icon: Settings,
-      children: [
-        { id: 'test-supabase', name: 'اختبار Supabase', icon: Database }
-      ]
     }
   ];
 
@@ -160,9 +148,6 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
     { id: 'audit', name: 'سجل المراجعة', icon: Activity, description: 'سجل جميع العمليات في النظام' }
   ];
 
-  React.useEffect(() => {
-    logInfo('تم تحميل لوحة التحكم الرئيسية', 'AdminDashboard');
-  }, []);
 
   // Initialize open menus based on active tab
   React.useEffect(() => {
@@ -514,24 +499,6 @@ export default function AdminDashboard({ activeTab, setActiveTab }: AdminDashboa
               </button>
             </div>
           </div>
-        </div>
-      );
-    }
-
-    // Test Supabase page
-    if (activeTab === 'test-supabase') {
-      return (
-        <div className="space-y-6">
-          <div className="flex items-center space-x-4 space-x-reverse">
-            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-              <IconComponent className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900">{pageInfo.name}</h2>
-              <p className="text-gray-600 mt-1">اختبار الاتصال وجلب البيانات من Supabase</p>
-            </div>
-          </div>
-          <TestSupabasePage />
         </div>
       );
     }

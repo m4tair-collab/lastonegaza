@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { Bell, Search, Filter, Plus, Eye, Trash2, CheckCircle, AlertTriangle, Clock, Users, Package, Download, RefreshCw, X, Star, TrendingUp, Activity, Shield, MessageSquare } from 'lucide-react';
 import { useAlerts } from '../../context/AlertsContext';
 import { mockBeneficiaries, mockPackages, mockTasks, type Alert } from '../../data/mockData';
-import { useErrorLogger } from '../../utils/errorLogger';
 import { Button, Card, Input, Badge, Modal } from '../ui';
 
 export default function AlertsManagementPage() {
   const { alerts, unreadAlerts, criticalAlerts, markAsRead, removeAlert, clearAllAlerts, addAlert } = useAlerts();
-  const { logInfo, logError } = useErrorLogger();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -57,7 +55,6 @@ export default function AlertsManagementPage() {
     markAsRead(alertId);
     setNotification({ message: 'تم وضع علامة كمقروء', type: 'success' });
     setTimeout(() => setNotification(null), 3000);
-    logInfo(`تم وضع علامة كمقروء للتنبيه: ${alertId}`, 'AlertsManagementPage');
   };
 
   const handleDeleteAlert = (alertId: string) => {
@@ -65,7 +62,6 @@ export default function AlertsManagementPage() {
       removeAlert(alertId);
       setNotification({ message: 'تم حذف التنبيه بنجاح', type: 'success' });
       setTimeout(() => setNotification(null), 3000);
-      logInfo(`تم حذف التنبيه: ${alertId}`, 'AlertsManagementPage');
     }
   };
 
@@ -74,7 +70,6 @@ export default function AlertsManagementPage() {
       clearAllAlerts();
       setNotification({ message: 'تم حذف جميع التنبيهات', type: 'warning' });
       setTimeout(() => setNotification(null), 3000);
-      logInfo('تم حذف جميع التنبيهات', 'AlertsManagementPage');
     }
   };
 
@@ -109,7 +104,6 @@ export default function AlertsManagementPage() {
     });
     
     setShowModal(false);
-    logInfo(`تم إضافة تنبيه جديد: ${newAlertForm.title}`, 'AlertsManagementPage');
   };
 
   const handleBulkAction = (action: 'mark-read' | 'delete') => {

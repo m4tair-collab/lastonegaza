@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { MessageSquare, Mail, Phone, Bell, Settings, Save, Plus, Edit, Trash2, Eye, Copy, Download, Upload, RefreshCw, CheckCircle, AlertTriangle, Clock, Users, Send, FileText, Star, Activity, X, Search, Filter } from 'lucide-react';
-import { useErrorLogger } from '../../utils/errorLogger';
 import { Button, Card, Input, Badge, Modal } from '../ui';
 
 interface MessageTemplate {
@@ -46,7 +45,6 @@ interface MessageLog {
 }
 
 export default function MessagesSettingsPage() {
-  const { logInfo, logError } = useErrorLogger();
   const [activeTab, setActiveTab] = useState('templates');
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -348,7 +346,6 @@ export default function MessagesSettingsPage() {
     setTimeout(() => setNotification(null), 3000);
     setShowModal(false);
     setSelectedItem(null);
-    logInfo(`تم ${selectedItem ? 'تحديث' : 'إضافة'} قالب الرسالة: ${templateForm.name}`, 'MessagesSettingsPage');
   };
 
   const handleDeleteTemplate = (template: MessageTemplate) => {
@@ -356,7 +353,6 @@ export default function MessagesSettingsPage() {
       setMessageTemplates(prev => prev.filter(t => t.id !== template.id));
       setNotification({ message: 'تم حذف القالب بنجاح', type: 'success' });
       setTimeout(() => setNotification(null), 3000);
-      logInfo(`تم حذف قالب الرسالة: ${template.name}`, 'MessagesSettingsPage');
     }
   };
 

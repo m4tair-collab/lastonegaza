@@ -10,7 +10,6 @@ import {
   type Package as PackageType, 
   type Courier 
 } from '../../data/mockData';
-import { useErrorLogger } from '../../utils/errorLogger';
 import { Button, Card, Input, Badge, Modal } from '../ui';
 
 export default function TasksManagementPage() {
@@ -22,7 +21,6 @@ export default function TasksManagementPage() {
   const [modalType, setModalType] = useState<'assign' | 'update' | 'view' | 'reschedule'>('assign');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'warning' } | null>(null);
-  const { logInfo, logError } = useErrorLogger();
 
   // استخدام البيانات الوهمية مباشرة
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
@@ -174,9 +172,7 @@ export default function TasksManagementPage() {
       
       setShowModal(false);
       setSelectedTask(null);
-      logInfo(`تم تعيين مندوب للمهمة: ${selectedTask.id}`, 'TasksManagementPage');
     } catch (error) {
-      logError(error as Error, 'TasksManagementPage');
       setNotification({ message: 'حدث خطأ في تعيين المندوب', type: 'error' });
       setTimeout(() => setNotification(null), 3000);
     }
@@ -214,9 +210,7 @@ export default function TasksManagementPage() {
       
       setShowModal(false);
       setSelectedTask(null);
-      logInfo(`تم تحديث حالة المهمة: ${selectedTask.id}`, 'TasksManagementPage');
     } catch (error) {
-      logError(error as Error, 'TasksManagementPage');
       setNotification({ message: 'حدث خطأ في تحديث حالة المهمة', type: 'error' });
       setTimeout(() => setNotification(null), 3000);
     }
@@ -252,9 +246,7 @@ export default function TasksManagementPage() {
       
       setShowModal(false);
       setSelectedTask(null);
-      logInfo(`تم إعادة جدولة المهمة: ${selectedTask.id}`, 'TasksManagementPage');
     } catch (error) {
-      logError(error as Error, 'TasksManagementPage');
       setNotification({ message: 'حدث خطأ في إعادة جدولة المهمة', type: 'error' });
       setTimeout(() => setNotification(null), 3000);
     }

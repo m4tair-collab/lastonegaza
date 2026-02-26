@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Package, Search, Filter, Plus, Eye, Edit, Trash2, CheckCircle, Clock, AlertTriangle, Building2, Star, Download, RefreshCw, Copy, Users, TrendingUp, BarChart3 } from 'lucide-react';
 import { mockPackageTemplates, mockOrganizations, type PackageTemplate, type Organization, type PackageItem } from '../../data/mockData';
-import { useErrorLogger } from '../../utils/errorLogger';
 import { Modal } from '../ui';
 import PackageTemplateForm from '../PackageTemplateForm';
 
@@ -16,7 +15,6 @@ export default function PackageListPage({ loggedInUser }: PackageListPageProps) 
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'add' | 'edit' | 'view' | 'copy'>('add');
   const [selectedTemplate, setSelectedTemplate] = useState<PackageTemplate | null>(null);
-  const { logError, logInfo } = useErrorLogger();
 
   // Add missing state variables
   const [templatesLoading, setTemplatesLoading] = useState(false);
@@ -49,23 +47,20 @@ export default function PackageListPage({ loggedInUser }: PackageListPageProps) 
       totalWeight: data.totalWeight || 0,
       estimatedCost: data.estimatedCost || 0,
     };
-    mockPackageTemplates.unshift(newTemplate); // Add to mock data
-    setTemplates([...mockPackageTemplates]); // Update state
-    logInfo(`تم إضافة قالب: ${newTemplate.name}`, 'PackageListPage');
+    mockPackageTemplates.unshift(newTemplate);
+    setTemplates([...mockPackageTemplates]);
     return true;
   };
 
   const updateTemplate = async (id: string, data: Partial<PackageTemplate>) => {
-    logInfo(`محاكاة إضافة قالب: ${data.name}`, 'PackageListPage');
     return true;
   };
 
   const deleteTemplate = async (id: string) => {
     const initialLength = mockPackageTemplates.length;
     const updatedTemplates = mockPackageTemplates.filter(t => t.id !== id);
-    mockPackageTemplates.splice(0, mockPackageTemplates.length, ...updatedTemplates); // Mutate original mock array
-    setTemplates([...mockPackageTemplates]); // Update state
-    logInfo(`تم حذف القالب: ${id}`, 'PackageListPage');
+    mockPackageTemplates.splice(0, mockPackageTemplates.length, ...updatedTemplates);
+    setTemplates([...mockPackageTemplates]);
     return mockPackageTemplates.length < initialLength;
   };
 
@@ -113,30 +108,17 @@ export default function PackageListPage({ loggedInUser }: PackageListPageProps) 
 
   const handleDelete = async (template: PackageTemplate) => {
     if (confirm(`هل أنت متأكد من حذف القالب "${template.name}"؟`)) {
-      try {
-        const success = await deleteTemplate(template.id);
-        if (success) {
-          logInfo(`تم حذف القالب: ${template.name}`, 'PackageListPage');
-        } else {
-          logError(new Error(`فشل حذف القالب: ${template.name}`), 'PackageListPage');
-        }
-      } catch (err) {
-        logError(err as Error, 'PackageListPage');
-      }
+      await deleteTemplate(template.id);
     }
   };
 
   const handleActivateTemplate = async (template: PackageTemplate) => {
-    // Simulate update
     await updateTemplate(template.id, { status: 'active' });
-    logInfo(`تم تفعيل القالب: ${template.name}`, 'PackageListPage');
     refetchTemplates();
   };
 
   const handleDeactivateTemplate = async (template: PackageTemplate) => {
     await updateTemplate(template.id, { status: 'inactive' });
-    // Simulate update
-    logInfo(`تم إلغاء تفعيل القالب: ${template.name}`, 'PackageListPage');
     refetchTemplates();
   };
 
@@ -505,19 +487,13 @@ export default function PackageListPage({ loggedInUser }: PackageListPageProps) 
               <PackageTemplateForm
                 template={modalType === 'add' ? null : selectedTemplate}
                 onSave={async (data) => {
-                  try {
-                    if (modalType === 'add' || modalType === 'copy') {
-                      await insertTemplate(data);
-                      logInfo(`تم ${modalType === 'copy' ? 'نسخ' : 'إضافة'} القالب بنجاح: ${data.name}`, 'PackageListPage');
-                    } else if (modalType === 'edit' && selectedTemplate) {
-                      await updateTemplate(selectedTemplate.id, data);
-                      logInfo(`تم تحديث القالب بنجاح: ${data.name}`, 'PackageListPage');
-                    }
-                    setShowModal(false);
-                    setSelectedTemplate(null);
-                  } catch (error) {
-                    logError(error as Error, 'PackageListPage');
+                  if (modalType === 'add' || modalType === 'copy') {
+                    await insertTemplate(data);
+                  } else if (modalType === 'edit' && selectedTemplate) {
+                    await updateTemplate(selectedTemplate.id, data);
                   }
+                  setShowModal(false);
+                  setSelectedTemplate(null);
                 }}
                 onCancel={() => {
                   setShowModal(false);

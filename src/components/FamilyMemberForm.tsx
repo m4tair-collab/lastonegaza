@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, Phone, MapPin, Calendar, Shield, Save, X, AlertTriangle, CheckCircle, Users, Briefcase, Heart, DollarSign, FileText, Home, UserPlus } from 'lucide-react';
 import { type Beneficiary, mockFamilies } from '../data/mockData';
-import { useErrorLogger } from '../utils/errorLogger';
 import { Button, Card, Input, Badge } from './ui';
 
 interface FamilyMemberFormProps {
@@ -27,7 +26,6 @@ interface FormData {
 }
 
 export default function FamilyMemberForm({ familyId, member, onSave, onCancel }: FamilyMemberFormProps) {
-  const { logError, logInfo } = useErrorLogger();
   
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -154,9 +152,8 @@ export default function FamilyMemberForm({ familyId, member, onSave, onCancel }:
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
-      logError(new Error('فشل في التحقق من صحة البيانات'), 'FamilyMemberForm');
       return;
     }
 
@@ -204,16 +201,9 @@ export default function FamilyMemberForm({ familyId, member, onSave, onCancel }:
       };
 
       onSave(memberData);
-      
-      if (isEditing && member) {
-        logInfo(`محاكاة تحديث بيانات فرد العائلة: ${formData.name}`, 'FamilyMemberForm');
-      } else {
-        logInfo(`محاكاة إضافة فرد جديد للعائلة: ${formData.name}`, 'FamilyMemberForm');
-      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
       setOperationError(errorMessage);
-      logError(new Error(errorMessage), 'FamilyMemberForm');
     } finally {
       setIsSubmitting(false);
     }

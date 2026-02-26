@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Building2, Search, Filter, Plus, Eye, Edit, Phone, Mail, CheckCircle, Clock, AlertTriangle, Users, Package, Star, TrendingUp, Download, MapPin, Calendar, RefreshCw } from 'lucide-react';
 import { mockOrganizations, type Organization } from '../../data/mockData'; // Removed Shield
-import { useErrorLogger } from '../../utils/errorLogger';
 import { Button } from '../ui';
 
 import OrganizationForm from '../OrganizationForm';
@@ -16,7 +15,6 @@ export default function OrganizationsListPage({ loggedInUser, highlightOrganizat
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'add' | 'edit' | 'view'>('add');
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
-  const { logError, logInfo } = useErrorLogger();
 
   // استخدام البيانات الوهمية مباشرة
   const organizations = mockOrganizations;
@@ -26,25 +24,21 @@ export default function OrganizationsListPage({ loggedInUser, highlightOrganizat
   const refetch = () => {
     // Simulate refetching mock data
     // In a real app, this would re-fetch from the backend
-    logInfo('محاكاة تحديث بيانات المؤسسات', 'OrganizationsListPage');
     // For mock data, we just re-render or update the mock data directly if it were mutable
   };
 
   // محاكاة العمليات
   const insert = async (data: Partial<Organization>) => {
-    logInfo(`محاكاة إضافة مؤسسة: ${data.name}`, 'OrganizationsListPage');
     // Simulate adding to mock data
     mockOrganizations.push({ ...data, id: `org-${Date.now()}`, beneficiariesCount: 0, packagesCount: 0, completionRate: 0, createdAt: new Date().toISOString(), packagesAvailable: 0, templatesCount: 0, isPopular: false } as Organization);
     return true;
   };
 
   const update = async (id: string, data: Partial<Organization>) => {
-    logInfo(`محاكاة تحديث مؤسسة: ${id}`, 'OrganizationsListPage');
     return true;
   };
 
   const deleteRecord = async (id: string) => {
-    logInfo(`محاكاة حذف مؤسسة: ${id}`, 'OrganizationsListPage');
     return true;
   };
 
@@ -86,7 +80,6 @@ export default function OrganizationsListPage({ loggedInUser, highlightOrganizat
   const handleDelete = async (organization: Organization) => {
     if (confirm(`هل أنت متأكد من حذف المؤسسة "${organization.name}"؟`)) {
       await deleteRecord(organization.id);
-      logInfo(`تم حذف المؤسسة: ${organization.name}`, 'OrganizationsListPage');
       refetch();
     }
   };

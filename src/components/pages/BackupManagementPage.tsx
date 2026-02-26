@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Database, Download, Upload, Calendar, Shield, Clock, CheckCircle, AlertTriangle, RefreshCw, Trash2, Eye, Settings, Lock, Unlock, HardDrive, Server, Activity, FileText, Save, X, Plus, Filter, Search, Archive, Folder, File } from 'lucide-react';
-import { useErrorLogger } from '../../utils/errorLogger';
 import { Button, Card, Input, Badge, Modal } from '../ui';
 
 interface BackupFile {
@@ -29,7 +28,6 @@ interface BackupSchedule {
 }
 
 export default function BackupManagementPage() {
-  const { logInfo, logError } = useErrorLogger();
   const [activeTab, setActiveTab] = useState('backups');
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -201,12 +199,9 @@ export default function BackupManagementPage() {
         encrypted: true,
         includeFiles: true
       });
-      
-      logInfo(`تم إنشاء نسخة احتياطية: ${newBackup.name}`, 'BackupManagementPage');
     } catch (error) {
       setNotification({ message: 'حدث خطأ في إنشاء النسخة الاحتياطية', type: 'error' });
       setTimeout(() => setNotification(null), 3000);
-      logError(error as Error, 'BackupManagementPage');
     } finally {
       setIsCreatingBackup(false);
       setBackupProgress(0);
@@ -218,7 +213,6 @@ export default function BackupManagementPage() {
       setBackupFiles(prev => prev.filter(b => b.id !== backup.id));
       setNotification({ message: 'تم حذف النسخة الاحتياطية بنجاح', type: 'success' });
       setTimeout(() => setNotification(null), 3000);
-      logInfo(`تم حذف نسخة احتياطية: ${backup.name}`, 'BackupManagementPage');
     }
   };
 
@@ -259,7 +253,6 @@ export default function BackupManagementPage() {
         setNotification({ message: 'تم استعادة البيانات بنجاح', type: 'success' });
         setTimeout(() => setNotification(null), 3000);
       }, 3000);
-      logInfo(`تم استعادة نسخة احتياطية: ${backup.name}`, 'BackupManagementPage');
     }
   };
 
@@ -294,8 +287,6 @@ export default function BackupManagementPage() {
       retentionDays: 30,
       enabled: true
     });
-    
-    logInfo(`تم إنشاء جدولة نسخ احتياطي: ${newSchedule.name}`, 'BackupManagementPage');
   };
 
   const calculateNextRun = (frequency: string, time: string): string => {

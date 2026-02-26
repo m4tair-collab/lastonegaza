@@ -4,14 +4,12 @@ import { mockBeneficiaries, type Beneficiary } from '../../data/mockData';
 import BeneficiaryProfileModal from '../BeneficiaryProfileModal';
 import { Button, Card, Input, Badge, ConfirmationModal } from '../ui';
 import { useBeneficiaries } from '../../hooks/useBeneficiaries';
-import { useErrorLogger } from '../../utils/errorLogger';
 
 interface StatusManagementPageProps {
   onNavigateToIndividualSend: (beneficiaryId: string) => void;
 }
 
 export default function StatusManagementPage({ onNavigateToIndividualSend }: StatusManagementPageProps) {
-  const { logInfo, logError } = useErrorLogger();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<Beneficiary | null>(null);
   
@@ -239,7 +237,6 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
               mockBeneficiaries[beneficiaryIndex].identityStatus = 'verified';
               mockBeneficiaries[beneficiaryIndex].updatedAt = new Date().toISOString();
             }
-            logInfo(`تم توثيق هوية المستفيد: ${confirmAction.beneficiaryName}`, 'StatusManagementPage');
           }
           break;
           
@@ -251,7 +248,6 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
               mockBeneficiaries[beneficiaryIndex].identityStatus = 'pending';
               mockBeneficiaries[beneficiaryIndex].updatedAt = new Date().toISOString();
             }
-            logInfo(`تم طلب إعادة رفع الوثائق من المستفيد: ${confirmAction.beneficiaryName}. سيتم إرسال إشعار له لرفع وثائق جديدة.`, 'StatusManagementPage');
           }
           break;
           
@@ -265,7 +261,6 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
                 mockBeneficiaries[beneficiaryIndex].updatedAt = new Date().toISOString();
               }
             });
-            logInfo(`تم توثيق ${confirmAction.beneficiaryIds.length} مستفيد بشكل جماعي`, 'StatusManagementPage');
             setSelectedBeneficiaries([]);
           }
           break;
@@ -280,7 +275,6 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
                 mockBeneficiaries[beneficiaryIndex].updatedAt = new Date().toISOString();
               }
             });
-            logInfo(`تم طلب إعادة رفع الوثائق من ${confirmAction.beneficiaryIds.length} مستفيد بشكل جماعي. سيتم إرسال إشعارات لهم لرفع وثائق جديدة.`, 'StatusManagementPage');
             setSelectedBeneficiaries([]);
           }
           break;
@@ -293,15 +287,13 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
               mockBeneficiaries[beneficiaryIndex].status = 'suspended';
               mockBeneficiaries[beneficiaryIndex].updatedAt = new Date().toISOString();
             }
-            logInfo(`تم تعليق حساب المستفيد: ${confirmAction.beneficiaryName}. تم إيقاف جميع الخدمات وسيتم إشعار المستفيد.`, 'StatusManagementPage');
           }
           break;
       }
-      
+
       // Force re-render by updating state
       setCurrentPage(currentPage);
     } catch (error) {
-      logError(error as Error, 'StatusManagementPage');
     }
   };
   
@@ -364,7 +356,6 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
               // محاكاة تحديث البيانات
               setCurrentPage(1);
               setSelectedBeneficiaries([]);
-              logInfo('تم تحديث حالات التوثيق', 'StatusManagementPage');
             }}
           >
             تحديث حالات التوثيق
@@ -398,8 +389,6 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
               link.download = `تقرير_التوثيق_${new Date().toISOString().split('T')[0]}.json`;
               link.click();
               URL.revokeObjectURL(url);
-              
-              logInfo('تم تصدير تقرير التوثيق', 'StatusManagementPage');
             }}
           >
             تصدير تقرير التوثيق

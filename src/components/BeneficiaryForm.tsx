@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, Phone, MapPin, Calendar, Shield, Save, X, AlertTriangle, CheckCircle, Users, Briefcase, Heart, DollarSign, FileText, Home } from 'lucide-react';
 import { type Beneficiary } from '../data/mockData';
-import { useErrorLogger } from '../utils/errorLogger';
 import { Button, Card, Input, Badge } from './ui';
 
 interface BeneficiaryFormProps {
@@ -33,7 +32,6 @@ interface FormData {
 }
 
 export default function BeneficiaryForm({ beneficiary, onSave, onCancel }: BeneficiaryFormProps) {
-  const { logError, logInfo } = useErrorLogger();
   
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -187,9 +185,8 @@ export default function BeneficiaryForm({ beneficiary, onSave, onCancel }: Benef
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
-      logError(new Error('فشل في التحقق من صحة البيانات'), 'BeneficiaryForm');
       return;
     }
 
@@ -223,17 +220,10 @@ export default function BeneficiaryForm({ beneficiary, onSave, onCancel }: Benef
 
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if (isEditing && beneficiary) {
-        logInfo(`محاكاة تحديث بيانات المستفيد: ${formData.name}`, 'BeneficiaryForm');
-      } else {
-        logInfo(`محاكاة إضافة مستفيد جديد: ${formData.name}`, 'BeneficiaryForm');
-      }
-
       onSave();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
       setOperationError(errorMessage);
-      logError(new Error(errorMessage), 'BeneficiaryForm');
     } finally {
       setIsSubmitting(false);
     }

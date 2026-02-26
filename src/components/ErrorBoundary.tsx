@@ -1,6 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Bug, Copy, CheckCircle } from 'lucide-react'; // No change needed for icons
-import { errorLogger } from '../utils/errorLogger';
+import { AlertTriangle, RefreshCw, Bug, Copy, CheckCircle } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
@@ -27,12 +26,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ errorInfo });
-    
-    // تسجيل الخطأ
-    errorLogger.logError(error, this.props.componentName || 'ErrorBoundary', {
-      componentStack: errorInfo.componentStack,
-      errorBoundary: true
-    });
   }
 
   handleReload = () => {

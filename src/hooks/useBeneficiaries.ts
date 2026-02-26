@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { type Beneficiary, mockBeneficiaries } from '../data/mockData';
-import { useErrorLogger } from '../utils/errorLogger';
 
 interface UseBeneficiariesOptions {
   organizationId?: string;
@@ -27,7 +26,6 @@ export const useBeneficiaries = (options: UseBeneficiariesOptions = {}) => {
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { logInfo, logError } = useErrorLogger();
 
   // جلب البيانات
   useEffect(() => {
@@ -35,35 +33,33 @@ export const useBeneficiaries = (options: UseBeneficiariesOptions = {}) => {
       try {
         setLoading(true);
         setError(null);
-        
+
         // محاكاة تأخير الشبكة
         await new Promise(resolve => setTimeout(resolve, 300));
-        
+
         let filteredData = [...mockBeneficiaries];
-        
+
         // فلترة حسب المؤسسة
         if (options.organizationId) {
           filteredData = filteredData.filter(b => b.organizationId === options.organizationId);
         }
-        
+
         // فلترة حسب العائلة
         if (options.familyId) {
           filteredData = filteredData.filter(b => b.familyId === options.familyId);
         }
-        
+
         setBeneficiaries(filteredData);
-        logInfo(`تم تحميل ${filteredData.length} مستفيد`, 'useBeneficiaries');
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'خطأ في تحميل المستفيدين';
         setError(errorMessage);
-        logError(new Error(errorMessage), 'useBeneficiaries');
       } finally {
         setLoading(false);
       }
     };
 
     fetchBeneficiaries();
-  }, [options.organizationId, options.familyId, logInfo, logError]);
+  }, [options.organizationId, options.familyId]);
 
   // فلترة البيانات بناءً على البحث والفلاتر
   const filteredBeneficiaries = useMemo(() => {
@@ -269,12 +265,10 @@ export const useBeneficiaries = (options: UseBeneficiariesOptions = {}) => {
       };
 
       setBeneficiaries(prev => [newBeneficiary, ...prev]);
-      logInfo(`تم إضافة مستفيد جديد: ${newBeneficiary.name}`, 'useBeneficiaries');
       return newBeneficiary;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'خطأ في إضافة المستفيد';
       setError(errorMessage);
-      logError(new Error(errorMessage), 'useBeneficiaries');
       throw err;
     } finally {
       setLoading(false);
@@ -285,19 +279,16 @@ export const useBeneficiaries = (options: UseBeneficiariesOptions = {}) => {
     try {
       setLoading(true);
       
-      setBeneficiaries(prev => 
-        prev.map(b => 
-          b.id === id 
+      setBeneficiaries(prev =>
+        prev.map(b =>
+          b.id === id
             ? { ...b, ...updates, updatedAt: new Date().toISOString() }
             : b
         )
       );
-      
-      logInfo(`تم تحديث المستفيد: ${id}`, 'useBeneficiaries');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'خطأ في تحديث المستفيد';
       setError(errorMessage);
-      logError(new Error(errorMessage), 'useBeneficiaries');
       throw err;
     } finally {
       setLoading(false);
@@ -309,11 +300,9 @@ export const useBeneficiaries = (options: UseBeneficiariesOptions = {}) => {
       setLoading(true);
       
       setBeneficiaries(prev => prev.filter(b => b.id !== id));
-      logInfo(`تم حذف المستفيد: ${id}`, 'useBeneficiaries');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'خطأ في حذف المستفيد';
       setError(errorMessage);
-      logError(new Error(errorMessage), 'useBeneficiaries');
       throw err;
     } finally {
       setLoading(false);
