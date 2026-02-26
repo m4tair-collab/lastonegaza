@@ -417,7 +417,6 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">جميع حالات التوثيق</option>
-              <option value="verified">موثق</option>
               <option value="pending">بانتظار التوثيق</option>
               <option value="rejected">مرفوض التوثيق</option>
             </select>
@@ -524,28 +523,7 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
       )}
 
       {/* Identity Verification Categories */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card hover className="text-center">
-          <div className="flex items-center justify-between mb-4">
-            <div className="bg-green-100 p-3 rounded-xl">
-              <Shield className="w-8 h-8 text-green-600" />
-            </div>
-            <span className="text-3xl font-bold text-green-600">
-              {filteredBeneficiaries.filter(b => b.identityStatus === 'verified').length}
-            </span>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">موثقين</h3>
-          <p className="text-sm text-gray-600 mb-4">تم التحقق من هويتهم</p>
-          <Button
-            variant="success"
-            size="sm"
-            className="w-full"
-            onClick={() => setIdentityStatusFilter('verified')}
-          >
-            عرض الموثقين
-          </Button>
-        </Card>
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card hover className="text-center">
           <div className="flex items-center justify-between mb-4">
             <div className="bg-yellow-100 p-3 rounded-xl">
@@ -894,7 +872,7 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-2 gap-4">
           <div className="bg-red-50 p-4 rounded-xl border border-red-200">
             <h4 className="font-medium text-red-800 mb-2">يحتاجون إعادة رفع</h4>
             <p className="text-sm text-red-600">
@@ -905,12 +883,6 @@ export default function StatusManagementPage({ onNavigateToIndividualSend }: Sta
             <h4 className="font-medium text-yellow-800 mb-2">بانتظار التوثيق</h4>
             <p className="text-sm text-yellow-600">
               {filteredBeneficiaries.filter(b => b.identityStatus === 'pending').length} حالة تحتاج مراجعة
-            </p>
-          </div>
-          <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-            <h4 className="font-medium text-blue-800 mb-2">تم التوثيق</h4>
-            <p className="text-sm text-blue-600">
-              {filteredBeneficiaries.filter(b => b.identityStatus === 'verified').length} مستفيد موثق
             </p>
           </div>
         </div>
